@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "955702872087",
+    "firebase_url": "https://shoptime-90d0b.firebaseio.com",
+    "project_id": "shoptime-90d0b",
+    "storage_bucket": "shoptime-90d0b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:955702872087:android:8f8540c6e82e41bf",
+        "android_client_info": {
+          "package_name": "com.howlzzz.shoptime"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "955702872087-ug2uah8chs1l3rqf67co6n478gb80d2i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhMp9Rwkz5UA5tePZVaDbkmjR-UksxtoY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
