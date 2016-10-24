@@ -64,6 +64,7 @@ public class AddListDialogFragment extends DialogFragment {
         View rootView = inflater.inflate(R.layout.dialog_add_list, null);
         mEditTextListName = (EditText) rootView.findViewById(R.id.edit_text_list_name);
 
+
         /**
          * Call addShoppingList() when user taps "Done" keyboard action
          */

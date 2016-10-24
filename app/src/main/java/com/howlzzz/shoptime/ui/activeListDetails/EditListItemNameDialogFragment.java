@@ -17,10 +17,10 @@ import com.howlzzz.shoptime.model.ShopTime;
 public class EditListItemNameDialogFragment extends EditListDialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    public static EditListItemNameDialogFragment newInstance(ShopTime shoppingList) {
+    public static EditListItemNameDialogFragment newInstance(ShopTime shoppingList,String listId) {
         EditListItemNameDialogFragment editListItemNameDialogFragment = new EditListItemNameDialogFragment();
 
-        Bundle bundle = EditListDialogFragment.newInstanceHelper(shoppingList, R.layout.dialog_edit_item);
+        Bundle bundle = EditListDialogFragment.newInstanceHelper(shoppingList, R.layout.dialog_edit_item,listId);
         editListItemNameDialogFragment.setArguments(bundle);
 
         return editListItemNameDialogFragment;

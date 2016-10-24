@@ -82,12 +82,25 @@ public class ShoppingListsFragment extends Fragment {
         //Firebase refListName = new Firebase(Constants.FIREBASE_URL).child(Constants.FIREBASE_LOCATION_ACTIVE_LIST);
 
         Firebase activeListsRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS);
+
+        /*Create the adapter, giving it the activity, model class, layout for each row in
+        the list and finally, a reference to the Firebase location with the list data*/
         mActiveListAdapter = new ActiveListAdapter(getActivity(), ShopTime.class, R.layout.single_active_list, activeListsRef);
         mListView.setAdapter(mActiveListAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+                ShopTime selectedList = mActiveListAdapter.getItem(position);
+                               if (selectedList != null) {
+                                    Intent intent = new Intent(getActivity(), ActiveListDetailsActivity.class);
+                                   /* Get the list ID using the adapter's get ref method to get the Firebase
+        * ref and then grab the key.
+                      */
+                                        String listId = mActiveListAdapter.getRef(position).getKey();
+                                        intent.putExtra(Constants.KEY_LIST_ID, listId);
+                                        /* Starts an active showing the details for the selected list */
+                                                startActivity(intent);
+                                    }
             }
         });
 
