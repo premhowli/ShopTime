@@ -86,7 +86,7 @@ public class EditListNameDialogFragment extends EditListDialogFragment {
                     //changedTimestampMap.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
 
                     /* Add the updated timestamp */
-                    updatedProperties.put("created", ServerValue.TIMESTAMP);
+                    updatedProperties.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
 
                     /* Do the update */
                     shoppingListRef.updateChildren(updatedProperties);

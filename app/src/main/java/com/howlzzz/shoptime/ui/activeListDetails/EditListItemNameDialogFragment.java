@@ -75,6 +75,10 @@ public class EditListItemNameDialogFragment extends EditListDialogFragment {
                     updatedItemToAddMap.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/"
                                     + mListId + "/" + mItemId + "/" + Constants.FIREBASE_PROPERTY_ITEM_NAME,
                             nameInput);
+
+
+                    updatedItemToAddMap.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/"
+                                    + mListId + "/" + Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
                     /* Make the timestamp for last changed */
                     /*HashMap<String, Object> changedTimestampMap = new HashMap<>();
                     changedTimestampMap.put("created", ServerValue.TIMESTAMP);*/
