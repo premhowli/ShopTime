@@ -71,7 +71,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         /* Calling invalidateOptionsMenu causes onCreateOptionsMenu to be called */
         invalidateOptionsMenu();
 
-        mActiveListItemAdapter = new ActiveListItemAdapter(this, ShoppingListItem.class,R.layout.single_active_list_item, listItemsRef);
+        mActiveListItemAdapter = new ActiveListItemAdapter(this, ShoppingListItem.class,R.layout.single_active_list_item, listItemsRef, mListId);
          /* Create ActiveListItemAdapter and set to listView */
                 mListView.setAdapter(mActiveListItemAdapter);
 
@@ -92,8 +92,9 @@ public class ActiveListDetailsActivity extends BaseActivity {
                     return;
                 }
                 mShoppingList = shoppingList;
-                //mActiveListItemAdapter.setShoppingList(mShoppingList);
 
+                //mActiveListItemAdapter.setShoppingList(mShoppingList);
+                mActiveListItemAdapter.setShoppingList(mShoppingList);
                 /* Calling invalidateOptionsMenu causes onCreateOptionsMenu to be called */
                 invalidateOptionsMenu();
 
@@ -137,9 +138,19 @@ public class ActiveListDetailsActivity extends BaseActivity {
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 /* Check that the view is not the empty footer item */
             if(view.getId() != R.id.list_view_footer_empty) {
-                showEditListItemNameDialog();
+                //showEditListItemNameDialog();
+
+                ShoppingListItem shoppingListItem = mActiveListItemAdapter.getItem(position);
+
+                                    if (shoppingListItem != null) {
+                                       String itemName = shoppingListItem.getItemName();
+                                        String itemId = mActiveListItemAdapter.getRef(position).getKey();
+
+                                        showEditListItemNameDialog(itemName, itemId);
+                                        return true;
+                                    }
             }
-            return true;
+            return false;
         }
     });
 }
@@ -296,12 +307,14 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
     /**
      * Show the edit list item name dialog after longClick on the particular item
+     * @param itemName
+     * @param itemId
      */
-    public void showEditListItemNameDialog() {
+    public void showEditListItemNameDialog(String itemName, String itemId) {
 
 
         FragmentManager fm=getSupportFragmentManager();
-        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList,mListId);
+        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId);
         dia.show(fm,"EditListItemNameShow");
 
         /* Create an instance of the dialog fragment and show it */

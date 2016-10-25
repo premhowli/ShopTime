@@ -28,6 +28,7 @@ public abstract class EditListDialogFragment extends DialogFragment {
     int mResource;
     String mListId;
 
+
     /**
      * Helper method that creates a basic bundle of all of the information needed to change
      * values in a shopping list.
