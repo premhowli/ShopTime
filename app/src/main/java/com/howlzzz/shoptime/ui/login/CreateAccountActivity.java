@@ -151,6 +151,7 @@ public class CreateAccountActivity extends BaseActivity {
                         // [START_EXCLUDE]
                         mAuthProgressDialog.dismiss();
                         // [END_EXCLUDE]
+                        //end
                     }
                 });
         // [END create_user_with_email]
