@@ -16,6 +16,8 @@
     <string name="log_error_updating_data">Error updating data: </string>
     <string name="log_error_the_read_failed">The read failed: </string>
     <string name="log_error_occurred">"Error occurred: "</string>
+    <string name="auth_failed">"Error occurred: Firebase "</string>
+
 
     <!-- Menu Strings -->
     <string name="action_logout">Logout</string>
