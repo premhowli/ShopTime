@@ -1,5 +1,7 @@
 package com.howlzzz.shoptime.ui.login;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -18,51 +20,111 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.AuthData;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ui.BaseActivity;
+import com.howlzzz.shoptime.ui.MainActivity;
+import com.howlzzz.shoptime.utils.Constants;
 
 import java.io.IOException;
 
 /**
  * Represents Sign in screen and functionality of the app
  */
-public class LoginActivity extends BaseActivity {
+public class LoginActivity extends BaseActivity implements
+        View.OnClickListener,GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String LOG_TAG = LoginActivity.class.getSimpleName();
     /* A dialog that is presented until the Firebase authentication finished. */
     private ProgressDialog mAuthProgressDialog;
     private EditText mEditTextEmailInput, mEditTextPasswordInput;
 
+
+
+    private FirebaseAuth mAuth;
     /**
      * Variables related to Google Login
      */
+
     /* A flag indicating that a PendingIntent is in progress and prevents us from starting further intents. */
     private boolean mGoogleIntentInProgress;
     /* Request code used to invoke sign in user interactions for Google+ */
-    public static final int RC_GOOGLE_LOGIN = 1;
+
+    private static final int RC_SIGN_IN = 9001;
     /* A Google account object that is populated if the user signs in with Google */
     GoogleSignInAccount mGoogleAccount;
+    private Firebase mFirebaseRef;
+    private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        Firebase.setAndroidContext(this);
+
+
+        mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
+
+        //setting up google api
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) this)
+                .addOnConnectionFailedListener(this)
+                .build();
 
         /**
          * Link layout elements from XML and setup progress dialog
          */
         initializeScreen();
+        mAuth = FirebaseAuth.getInstance();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    /*Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();*/
+                } else {
+                    // User is signed out
+                    Log.d(LOG_TAG, "onAuthStateChanged:signed_out");
+                }
+                // [START_EXCLUDE]
+                //updateUI(user);
+                // [END_EXCLUDE]
+            }
+        };
 
         /**
          * Call signInPassword() when user taps "Done" keyboard action
@@ -72,13 +134,32 @@ public class LoginActivity extends BaseActivity {
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
 
                 if (actionId == EditorInfo.IME_ACTION_DONE || keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
-                    signInPassword();
+                    signInPassword(mEditTextEmailInput.getText().toString(),mEditTextPasswordInput.getText().toString());
                 }
                 return true;
             }
         });
     }
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+        mGoogleApiClient.connect();
 
+    }
+    // [END on_start_add_listener]
+
+    // [START on_stop_remove_listener]
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+        if (mGoogleApiClient.isConnected()){
+            mGoogleApiClient.disconnect();
+        }
+    }
     @Override
     protected void onResume() {
         super.onResume();
@@ -104,7 +185,7 @@ public class LoginActivity extends BaseActivity {
      * Sign in with Password provider when user clicks sign in button
      */
     public void onSignInPressed(View view) {
-        signInPassword();
+        signInPassword(mEditTextEmailInput.getText().toString(),mEditTextPasswordInput.getText().toString());
     }
 
     /**
@@ -135,14 +216,50 @@ public class LoginActivity extends BaseActivity {
     /**
      * Sign in with Password provider (used when user taps "Done" action on keyboard)
      */
-    public void signInPassword() {
+    public void signInPassword(String email, String password) {
+
+        mAuth.signInWithEmailAndPassword(email,password)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(LOG_TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(LOG_TAG, "signInWithEmail:failed", task.getException());
+                            Toast.makeText(LoginActivity.this, R.string.auth_failed,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+                            Intent intent=new Intent(LoginActivity.this,MainActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+
+                        // [START_EXCLUDE]
+
+                        mAuthProgressDialog.hide();
+                        // [END_EXCLUDE]
+
+                    }
+                });
+
+
+
     }
 
     /**
      * Helper method that makes sure a user is created if the user
      * logs in with Firebase's email/password provider.
-     * @param authData AuthData object returned from onAuthenticated
+     *  authData AuthData object returned from onAuthenticated
      */
+
+
+
+
+
     private void setAuthenticatedUserPasswordProvider(AuthData authData) {
     }
 
@@ -165,29 +282,7 @@ public class LoginActivity extends BaseActivity {
 
     /**
      * Signs you into ShoppingList++ using the Google Login Provider
-     * @param token A Google OAuth access token returned from Google
-     */
-    private void loginWithGoogle(String token) {
-    }
-
-    /**
-     * GOOGLE SIGN IN CODE
-     *
-     * This code is mostly boiler plate from
-     * https://developers.google.com/identity/sign-in/android/start-integrating
-     * and
-     * https://github.com/googlesamples/google-services/blob/master/android/signin/app/src/main/java/com/google/samples/quickstart/signin/SignInActivity.java
-     *
-     * The big picture steps are:
-     * 1. User clicks the sign in with Google button
-     * 2. An intent is started for sign in.
-     *      - If the connection fails it is caught in the onConnectionFailed callback
-     *      - If it finishes, onActivityResult is called with the correct request code.
-     * 3. If the sign in was successful, set the mGoogleAccount to the current account and
-     * then call get GoogleOAuthTokenAndLogin
-     * 4. getGoogleOAuthTokenAndLogin launches an AsyncTask to get an OAuth2 token from Google.
-     * 5. Once this token is retrieved it is available to you in the onPostExecute method of
-     * the AsyncTask. **This is the token required by Firebase**
+     *  token A Google OAuth access token returned from Google
      */
 
 
@@ -207,9 +302,12 @@ public class LoginActivity extends BaseActivity {
      * Sign in with Google plus when user clicks "Sign in with Google" textView (button)
      */
     public void onSignInGooglePressed(View view) {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_GOOGLE_LOGIN);
+
         mAuthProgressDialog.show();
+
+        mGoogleApiClient.connect();
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
 
     }
 
@@ -228,85 +326,80 @@ public class LoginActivity extends BaseActivity {
      * This callback is triggered when any startActivityForResult finishes. The requestCode maps to
      * the value passed into startActivityForResult.
      */
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        /* Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...); */
-        if (requestCode == RC_GOOGLE_LOGIN) {
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
-        }
-
-    }
-
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(LOG_TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            /* Signed in successfully, get the OAuth token */
-            mGoogleAccount = result.getSignInAccount();
-            getGoogleOAuthTokenAndLogin();
-
-
-        } else {
-            if (result.getStatus().getStatusCode() == GoogleSignInStatusCodes.SIGN_IN_CANCELLED) {
-                showErrorToast("The sign in was cancelled. Make sure you're connected to the internet and try again.");
+            if (result.isSuccess()) {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = result.getSignInAccount();
+                firebaseAuthWithGoogle(account);
             } else {
-                showErrorToast("Error handling the sign in: " + result.getStatus().getStatusMessage());
+                // Google Sign In failed, update UI appropriately
+                // [START_EXCLUDE]
+                //updateUI(null);
+                // [END_EXCLUDE]
             }
-            mAuthProgressDialog.dismiss();
         }
     }
+
+    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+        Log.d(LOG_TAG, "firebaseAuthWithGoogle:" + acct.getId());
+        // [START_EXCLUDE silent]
+        mAuthProgressDialog.show();
+        // [END_EXCLUDE]
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        Log.d(LOG_TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+
+                        // If sign in fails, display a message to the user. If sign in succeeds
+                        // the auth state listener will be notified and logic to handle the
+                        // signed in user can be handled in the listener.
+                        if (!task.isSuccessful()) {
+                            Log.w(LOG_TAG, "signInWithCredential", task.getException());
+                            Toast.makeText(LoginActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                        // [START_EXCLUDE]
+                        mAuthProgressDialog.hide();
+                        Intent intent=new Intent(LoginActivity.this,MainActivity.class);
+                        startActivity(intent);
+                        finish();
+                        // [END_EXCLUDE]
+                    }
+                });
+    }
+
+    private void signIn() {
+        mGoogleApiClient.connect();
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+
 
     /**
      * Gets the GoogleAuthToken and logs in.
      */
-    private void getGoogleOAuthTokenAndLogin() {
-        /* Get OAuth token in Background */
-        AsyncTask<Void, Void, String> task = new AsyncTask<Void, Void, String>() {
-            String mErrorMessage = null;
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.d("Log_TAG","connected");
 
-            @Override
-            protected String doInBackground(Void... params) {
-                String token = null;
+    }
 
-                try {
-                    String scope = String.format(getString(R.string.oauth2_format), new Scope(Scopes.PROFILE)) + " email";
+    @Override
+    public void onConnectionSuspended(int i) {
 
-                    token = GoogleAuthUtil.getToken(LoginActivity.this, mGoogleAccount.getEmail(), scope);
-                } catch (IOException transientEx) {
-                    /* Network or server error */
-                    Log.e(LOG_TAG, getString(R.string.google_error_auth_with_google) + transientEx);
-                    mErrorMessage = getString(R.string.google_error_network_error) + transientEx.getMessage();
-                } catch (UserRecoverableAuthException e) {
-                    Log.w(LOG_TAG, getString(R.string.google_error_recoverable_oauth_error) + e.toString());
+    }
 
-                    /* We probably need to ask for permissions, so start the intent if there is none pending */
-                    if (!mGoogleIntentInProgress) {
-                        mGoogleIntentInProgress = true;
-                        Intent recover = e.getIntent();
-                        startActivityForResult(recover, RC_GOOGLE_LOGIN);
-                    }
-                } catch (GoogleAuthException authEx) {
-                    /* The call is not ever expected to succeed assuming you have already verified that
-                     * Google Play services is installed. */
-                    Log.e(LOG_TAG, " " + authEx.getMessage(), authEx);
-                    mErrorMessage = getString(R.string.google_error_auth_with_google) + authEx.getMessage();
-                }
-                return token;
-            }
+    @Override
+    public void onClick(View v) {
 
-            @Override
-            protected void onPostExecute(String token) {
-                mAuthProgressDialog.dismiss();
-                if (token != null) {
-                    /* Successfully got OAuth token, now login with Google */
-                    loginWithGoogle(token);
-                } else if (mErrorMessage != null) {
-                    showErrorToast(mErrorMessage);
-                }
-            }
-        };
-
-        task.execute();
     }
 }

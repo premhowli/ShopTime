@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.firebase.client.Firebase;
+import com.google.firebase.FirebaseApp;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ui.activeLists.AddListDialogFragment;
 import com.howlzzz.shoptime.ui.activeLists.ShoppingListsFragment;
@@ -30,6 +31,7 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FirebaseApp.initializeApp(this);
         Firebase.setAndroidContext(getApplicationContext());
 
         /**

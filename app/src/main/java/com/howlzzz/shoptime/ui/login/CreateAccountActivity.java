@@ -18,11 +18,13 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ui.BaseActivity;
+import com.howlzzz.shoptime.ui.MainActivity;
 import com.howlzzz.shoptime.utils.Constants;
 
 import java.util.Map;
@@ -44,14 +46,15 @@ public class CreateAccountActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_account);
+        FirebaseApp.initializeApp(this);
         Firebase.setAndroidContext(this);
         mAuth = FirebaseAuth.getInstance();
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
-
+        initializeScreen();
         /**
          * Link layout elements from XML and setup the progress dialog
          */
-        initializeScreen();
+
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -59,17 +62,38 @@ public class CreateAccountActivity extends BaseActivity {
                 if (user != null) {
                     // User is signed in
                     Log.d(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    /*Intent intent = new Intent(CreateAccountActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();*/
+
                 } else {
                     // User is signed out
                     Log.d(LOG_TAG, "onAuthStateChanged:signed_out");
+                    initializeScreen();
                 }
                 // [START_EXCLUDE]
                 //updateUI(user);
                 // [END_EXCLUDE]
             }
         };
+
     }
 
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
     /**
      * Override onCreateOptionsMenu to inflate nothing
      *
@@ -150,6 +174,10 @@ public class CreateAccountActivity extends BaseActivity {
 
                         // [START_EXCLUDE]
                         mAuthProgressDialog.dismiss();
+                        Intent intent = new Intent(CreateAccountActivity.this, LoginActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
                         // [END_EXCLUDE]
                         //end
                     }
