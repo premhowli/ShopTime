@@ -1,7 +1,9 @@
 package com.howlzzz.shoptime.ui;
 
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,6 +14,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.howlzzz.shoptime.R;
+import com.howlzzz.shoptime.utils.Constants;
 
 /**
  * BaseActivity class is used as a base class for all activities in the app
@@ -23,9 +26,12 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     protected GoogleApiClient mGoogleApiClient;
 
+    protected String mProvider, mEncodedEmail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         /* Setup the Google API object to allow Google logins */
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -40,6 +46,9 @@ public abstract class BaseActivity extends AppCompatActivity implements
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
+
+        mEncodedEmail = settings.getString(Constants.KEY_ENCODED_EMAIL, null);
+
     }
 
     @Override

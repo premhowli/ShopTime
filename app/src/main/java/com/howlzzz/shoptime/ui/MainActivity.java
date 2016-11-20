@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.firebase.client.Firebase;
 import com.google.firebase.FirebaseApp;
@@ -84,6 +85,7 @@ public class MainActivity extends BaseActivity {
         SectionPagerAdapter adapter = new SectionPagerAdapter(getSupportFragmentManager());
         viewPager.setOffscreenPageLimit(2);
         viewPager.setAdapter(adapter);
+        //Toast.makeText(MainActivity.this,mEncodedEmail,Toast.LENGTH_LONG);
         /**
          * Setup the mTabLayout with view pager
          */

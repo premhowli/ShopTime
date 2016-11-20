@@ -1,5 +1,7 @@
 package com.howlzzz.shoptime.ui.login;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -46,6 +48,7 @@ import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ui.BaseActivity;
 import com.howlzzz.shoptime.ui.MainActivity;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 import java.io.IOException;
 
@@ -60,6 +63,10 @@ public class LoginActivity extends BaseActivity implements
     /* A dialog that is presented until the Firebase authentication finished. */
     private ProgressDialog mAuthProgressDialog;
     private EditText mEditTextEmailInput, mEditTextPasswordInput;
+    SharedPreferences.Editor editor;
+    private String PREFS_KEY="email";
+
+
 
 
 
@@ -76,12 +83,14 @@ public class LoginActivity extends BaseActivity implements
     /* A Google account object that is populated if the user signs in with Google */
     GoogleSignInAccount mGoogleAccount;
     private Firebase mFirebaseRef;
+    SharedPreferences sp;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         Firebase.setAndroidContext(this);
 
 
@@ -345,7 +354,7 @@ public class LoginActivity extends BaseActivity implements
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         Log.d(LOG_TAG, "firebaseAuthWithGoogle:" + acct.getId());
         // [START_EXCLUDE silent]
         mAuthProgressDialog.show();
@@ -368,6 +377,10 @@ public class LoginActivity extends BaseActivity implements
                         }
                         // [START_EXCLUDE]
                         mAuthProgressDialog.hide();
+                        editor = sp.edit(); //2
+                        String encodeEmail= Utils.encodeEmail(acct.getGivenName().toString().toLowerCase());
+                        editor.putString(Constants.KEY_ENCODED_EMAIL, encodeEmail); //3
+                        editor.commit();
                         Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                         startActivity(intent);
                         finish();
