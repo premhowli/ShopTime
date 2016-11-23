@@ -23,10 +23,10 @@ public class EditListItemNameDialogFragment extends EditListDialogFragment {
     String mItemName, mItemId;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    public static EditListItemNameDialogFragment newInstance(ShopTime shoppingList,String itemName, String itemId,String listId) {
+    public static EditListItemNameDialogFragment newInstance(ShopTime shoppingList,String itemName, String itemId,String listId,String encodedEmail) {
         EditListItemNameDialogFragment editListItemNameDialogFragment = new EditListItemNameDialogFragment();
 
-        Bundle bundle = EditListDialogFragment.newInstanceHelper(shoppingList, R.layout.dialog_edit_item, listId);
+        Bundle bundle = EditListDialogFragment.newInstanceHelper(shoppingList, R.layout.dialog_edit_item,listId, encodedEmail);
         bundle.putString(Constants.KEY_LIST_ITEM_NAME, itemName);
         bundle.putString(Constants.KEY_LIST_ITEM_ID, itemId);
         editListItemNameDialogFragment.setArguments(bundle);

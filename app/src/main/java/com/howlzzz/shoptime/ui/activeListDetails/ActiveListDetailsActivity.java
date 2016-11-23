@@ -278,7 +278,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void showAddListItemDialog(View view) {
         /* Create an instance of the dialog fragment and show it */
         FragmentManager fm=getSupportFragmentManager();
-        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId);
+        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail);
         dia.show(fm,"AddListItemDialogShow");
 
         /*android.support.v4.app.DialogFragment dialog = AddListItemDialogFragment.newInstance(mShoppingList);
@@ -292,7 +292,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         /* Create an instance of the dialog fragment and show it */
 
         FragmentManager fm=getSupportFragmentManager();
-        EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId);
+        EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail);
         dia.show(fm,"EditListNameDialogShow");
 
 
@@ -314,7 +314,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
 
         FragmentManager fm=getSupportFragmentManager();
-        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId);
+        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId, mEncodedEmail);
         dia.show(fm,"EditListItemNameShow");
 
         /* Create an instance of the dialog fragment and show it */

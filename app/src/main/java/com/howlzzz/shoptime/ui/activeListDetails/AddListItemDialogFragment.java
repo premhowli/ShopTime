@@ -26,10 +26,10 @@ import java.util.Map;
 public class AddListItemDialogFragment extends EditListDialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    public static AddListItemDialogFragment newInstance(ShopTime shoppingList,String listId) {
+    public static AddListItemDialogFragment newInstance(ShopTime shoppingList,String listId,String encodedEmail) {
         AddListItemDialogFragment addListItemDialogFragment = new AddListItemDialogFragment();
 
-        Bundle bundle = newInstanceHelper(shoppingList, R.layout.dialog_add_item,listId);
+        Bundle bundle = newInstanceHelper(shoppingList, R.layout.dialog_add_item,listId,encodedEmail);
         addListItemDialogFragment.setArguments(bundle);
 
         return addListItemDialogFragment;
@@ -77,7 +77,7 @@ public class AddListItemDialogFragment extends EditListDialogFragment {
             String itemId = newRef.getKey();
 
             /* Make a POJO for the item and immediately turn it into a HashMap */
-            ShoppingListItem itemToAddObject = new ShoppingListItem(mItemName);
+            ShoppingListItem itemToAddObject = new ShoppingListItem(mItemName,mEncodedEmail);
             HashMap<String, Object> itemToAdd =
                     (HashMap<String, Object>) new ObjectMapper().convertValue(itemToAddObject, Map.class);
 

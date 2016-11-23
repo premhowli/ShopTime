@@ -8,37 +8,79 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.firebase.FirebaseApp;
 import com.howlzzz.shoptime.R;
+import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.ui.activeLists.AddListDialogFragment;
 import com.howlzzz.shoptime.ui.activeLists.ShoppingListsFragment;
 import com.howlzzz.shoptime.ui.meals.AddMealDialogFragment;
 import com.howlzzz.shoptime.ui.meals.MealsFragment;
+import com.howlzzz.shoptime.utils.Constants;
 
 /**
  * Represents the home screen of the app which
  * has a {@link ViewPager} with {@link ShoppingListsFragment} and {@link MealsFragment}
  */
 public class MainActivity extends BaseActivity {
+    private Firebase mUserRef;
+    private ValueEventListener mUserRefListener;
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         FirebaseApp.initializeApp(this);
         Firebase.setAndroidContext(getApplicationContext());
+
+        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
 
         /**
          * Link layout elements from XML and setup the toolbar
          */
         initializeScreen();
+
+
+
+        mUserRefListener = mUserRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot snapshot) {
+                            User user = snapshot.getValue(User.class);
+
+                            /**
+                         +                 * Set the activity title to current user name if user is not null
+                         +                 */
+                            if (user != null) {
+                                /* Assumes that the first word in the user's name is the user's first name. */
+                                String firstName = user.getName();
+                                String title = firstName + "'s Lists";
+                                setTitle(title);
+                                Log.e(LOG_TAG,"title");
+                            }
+                        }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(LOG_TAG,
+                        getString(R.string.log_error_the_read_failed) +
+                                firebaseError.getMessage());
+            }
+
+
+                    });
+
+
     }
 
 
@@ -69,6 +111,7 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mUserRef.removeEventListener(mUserRefListener);
     }
 
     /**
@@ -97,7 +140,8 @@ public class MainActivity extends BaseActivity {
      */
     public void showAddListDialog(View view) {
         /* Create an instance of the dialog fragment and show it */
-        DialogFragment dialog = AddListDialogFragment.newInstance();
+        //DialogFragment dialog = AddListDialogFragment.newInstance();
+        DialogFragment dialog = AddListDialogFragment.newInstance(mEncodedEmail);
         dialog.show(MainActivity.this.getFragmentManager(), "AddListDialogFragment");
     }
 

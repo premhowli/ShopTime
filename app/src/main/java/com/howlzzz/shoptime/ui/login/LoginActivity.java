@@ -381,7 +381,7 @@ public class LoginActivity extends BaseActivity implements
                         }
                         else{
                             editor = sp.edit(); //2
-                            String userName= acct.getGivenName().toString().toLowerCase();
+                            String userName= Utils.encodeEmail(acct.getEmail().toString().toLowerCase());
                             editor.putString(Constants.KEY_ENCODED_EMAIL, userName); //3
                             editor.commit();
                             Intent intent=new Intent(LoginActivity.this,MainActivity.class);

@@ -26,14 +26,16 @@ import java.util.HashMap;
  */
 public class AddListDialogFragment extends DialogFragment {
     EditText mEditTextListName;
+    String mEncodedEmail;
 
     /**
      * Public static constructor that creates fragment and
      * passes a bundle with data into it when adapter is created
      */
-    public static AddListDialogFragment newInstance() {
+    public static AddListDialogFragment newInstance(String encodedEmail) {
         AddListDialogFragment addListDialogFragment = new AddListDialogFragment();
         Bundle bundle = new Bundle();
+        bundle.putString(Constants.KEY_ENCODED_EMAIL, encodedEmail);
         addListDialogFragment.setArguments(bundle);
         return addListDialogFragment;
     }
@@ -44,6 +46,7 @@ public class AddListDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
     }
 
     /**
@@ -129,7 +132,7 @@ public class AddListDialogFragment extends DialogFragment {
             timestampCreated.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);*/
 
             /* Build the shopping list */
-            ShopTime newShoppingList = new ShopTime(userEnteredName, owner);
+            ShopTime newShoppingList = new ShopTime(userEnteredName, mEncodedEmail);
 
             /* Add the shopping list */
             newListRef.setValue(newShoppingList);
