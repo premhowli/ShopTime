@@ -22,8 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.client.AuthData;
+import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.UserRecoverableAuthException;
@@ -45,6 +47,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.howlzzz.shoptime.R;
+import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.ui.BaseActivity;
 import com.howlzzz.shoptime.ui.MainActivity;
 import com.howlzzz.shoptime.utils.Constants;
@@ -65,6 +68,7 @@ public class LoginActivity extends BaseActivity implements
     private EditText mEditTextEmailInput, mEditTextPasswordInput;
     SharedPreferences.Editor editor;
     private String PREFS_KEY="email";
+    private String mUserName, mUserEmail;
 
 
 
@@ -375,18 +379,55 @@ public class LoginActivity extends BaseActivity implements
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
+                        else{
+                            editor = sp.edit(); //2
+                            String userName= acct.getGivenName().toString().toLowerCase();
+                            editor.putString(Constants.KEY_ENCODED_EMAIL, userName); //3
+                            editor.commit();
+                            Intent intent=new Intent(LoginActivity.this,MainActivity.class);
+                            startActivity(intent);
+                            finish();
+
+                            //creating user data
+                            String encodeEmail=Utils.encodeEmail(acct.getEmail().toString());
+                            mUserEmail=acct.getEmail().toString();
+                            mUserName=acct.getGivenName().toString();
+                            createUserInFirebaseHelper(encodeEmail,mUserName,mUserEmail);
+                        }
                         // [START_EXCLUDE]
                         mAuthProgressDialog.hide();
-                        editor = sp.edit(); //2
-                        String encodeEmail= Utils.encodeEmail(acct.getGivenName().toString().toLowerCase());
-                        editor.putString(Constants.KEY_ENCODED_EMAIL, encodeEmail); //3
-                        editor.commit();
-                        Intent intent=new Intent(LoginActivity.this,MainActivity.class);
-                        startActivity(intent);
-                        finish();
+
                         // [END_EXCLUDE]
                     }
                 });
+    }
+
+    private void createUserInFirebaseHelper(String encodeEmail, final String mUserName, final String mUserEmail) {
+
+        final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(encodeEmail);
+        /**
+         +         * See if there is already a user (for example, if they already logged in with an associated
+         +         * Google account.
+         +         */
+        userLocation.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                        /* If there is no user, make one */
+                if (dataSnapshot.getValue() == null) {
+                         /* Set raw version of date to the ServerValue.TIMESTAMP value and save into dateCreatedMap */
+                    /*HashMap<String, Object> timestampJoined = new HashMap<>();
+                    timestampJoined.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);*/
+
+                    User newUser = new User(mUserName, mUserEmail);
+                    userLocation.setValue(newUser);
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.d(LOG_TAG, getString(R.string.log_error_occurred) + firebaseError.getMessage());
+            }
+        });
     }
 
     private void signIn() {
