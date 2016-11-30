@@ -316,7 +316,7 @@ public class LoginActivity extends BaseActivity implements
      */
     public void onSignInGooglePressed(View view) {
 
-        mAuthProgressDialog.show();
+        //mAuthProgressDialog.show();
 
         mGoogleApiClient.connect();
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
@@ -361,7 +361,7 @@ public class LoginActivity extends BaseActivity implements
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         Log.d(LOG_TAG, "firebaseAuthWithGoogle:" + acct.getId());
         // [START_EXCLUDE silent]
-        mAuthProgressDialog.show();
+        //mAuthProgressDialog.show();
         // [END_EXCLUDE]
 
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -384,6 +384,7 @@ public class LoginActivity extends BaseActivity implements
                             String userName= Utils.encodeEmail(acct.getEmail().toString().toLowerCase());
                             editor.putString(Constants.KEY_ENCODED_EMAIL, userName); //3
                             editor.commit();
+                            mAuthProgressDialog.hide();
                             Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                             startActivity(intent);
                             finish();

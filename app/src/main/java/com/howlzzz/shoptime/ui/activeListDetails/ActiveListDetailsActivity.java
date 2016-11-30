@@ -99,7 +99,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
                 invalidateOptionsMenu();
 
                 /* Set title appropriately. */
-                setTitle(shoppingList.getListName()+mEncodedEmail);
+                setTitle(shoppingList.getListName());
             }
 
             @Override

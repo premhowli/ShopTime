@@ -1,7 +1,9 @@
 package com.howlzzz.shoptime.ui;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -9,11 +11,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 
+import com.firebase.client.AuthData;
+import com.firebase.client.Firebase;
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.howlzzz.shoptime.R;
+import com.howlzzz.shoptime.ui.login.CreateAccountActivity;
+import com.howlzzz.shoptime.ui.login.LoginActivity;
 import com.howlzzz.shoptime.utils.Constants;
 
 /**
@@ -27,11 +37,13 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected GoogleApiClient mGoogleApiClient;
 
     protected String mProvider, mEncodedEmail;
+    private Firebase.AuthStateListener mAuthListener;
+    private Firebase mFirebaseRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         /* Setup the Google API object to allow Google logins */
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -42,18 +54,42 @@ public abstract class BaseActivity extends AppCompatActivity implements
          * Build a GoogleApiClient with access to the Google Sign-In API and the
          * options specified by gso.
          */
+        // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+                .addApi(AppIndex.API).build();
 
         mEncodedEmail = settings.getString(Constants.KEY_ENCODED_EMAIL, null);
+
+        if (!((this instanceof LoginActivity) || (this instanceof CreateAccountActivity))) {
+            mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
+            mAuthListener = new Firebase.AuthStateListener() {
+                @Override
+                public void onAuthStateChanged(AuthData authData) {
+                                 /* The user has been logged out */
+                    if (authData == null) {
+                                    /* Clear out shared preferences */
+                        SharedPreferences.Editor spe = settings.edit();
+                        spe.putString(Constants.KEY_ENCODED_EMAIL, null);
+
+
+                        takeUserToLoginScreenOnUnAuth();
+                    }
+                }
+            };
+            mFirebaseRef.addAuthStateListener(mAuthListener);
+        }
 
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (!((this instanceof LoginActivity) || (this instanceof CreateAccountActivity))) {
+               mFirebaseRef.removeAuthStateListener(mAuthListener);
+                    }
     }
 
     @Override
@@ -76,8 +112,45 @@ public abstract class BaseActivity extends AppCompatActivity implements
             super.onBackPressed();
             return true;
         }
+            if (id == R.id.action_logout) {
+                logout();
+                return true;
+            }
+
         return super.onOptionsItemSelected(item);
     }
+
+    protected void logout() {
+
+                /* Logout if mProvider is not null */
+
+                    mFirebaseRef.unauth();
+
+
+
+                        /* Logout from Google+ */
+                        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                                new ResultCallback<Status>() {
+                                    @Override
+                                    public void onResult(Status status) {
+                                        if(status.isSuccess()){
+                                            Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                                        }
+                                  }
+                                });
+                    }
+
+
+    private void takeUserToLoginScreenOnUnAuth() {
+                /* Move user to LoginActivity, and remove the backstack */
+                /*Intent intent = new Intent(BaseActivity.this, LoginActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();*/
+            }
 
     protected void initializeBackground(LinearLayout linearLayout) {
 
@@ -93,5 +166,23 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        mGoogleApiClient.connect();
+
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        mGoogleApiClient.disconnect();
+
     }
 }
