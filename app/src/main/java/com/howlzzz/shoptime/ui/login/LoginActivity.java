@@ -125,10 +125,10 @@ public class LoginActivity extends BaseActivity implements
                 if (user != null) {
                     // User is signed in
                     Log.d(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    /*Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
-                    finish();*/
+                    finish();
                 } else {
                     // User is signed out
                     Log.d(LOG_TAG, "onAuthStateChanged:signed_out");
@@ -381,8 +381,10 @@ public class LoginActivity extends BaseActivity implements
                         }
                         else{
                             editor = sp.edit(); //2
-                            String userName= Utils.encodeEmail(acct.getEmail().toString().toLowerCase());
-                            editor.putString(Constants.KEY_ENCODED_EMAIL, userName); //3
+                            String userName= Utils.encodeEmail(acct.getDisplayName().toString().toLowerCase());
+                            String encodeEmail=Utils.encodeEmail(acct.getEmail().toString());
+                            editor.putString(Constants.KEY_ENCODED_EMAIL, userName);
+                            editor.putString("emailcomma",encodeEmail);
                             editor.commit();
                             mAuthProgressDialog.hide();
                             Intent intent=new Intent(LoginActivity.this,MainActivity.class);
@@ -390,7 +392,7 @@ public class LoginActivity extends BaseActivity implements
                             finish();
 
                             //creating user data
-                            String encodeEmail=Utils.encodeEmail(acct.getEmail().toString());
+                            //String encodeEmail=Utils.encodeEmail(acct.getEmail().toString());
                             mUserEmail=acct.getEmail().toString();
                             mUserName=acct.getGivenName().toString();
                             createUserInFirebaseHelper(encodeEmail,mUserName,mUserEmail);

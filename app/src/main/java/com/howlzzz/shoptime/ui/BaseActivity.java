@@ -21,6 +21,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ui.login.CreateAccountActivity;
 import com.howlzzz.shoptime.ui.login.LoginActivity;
@@ -123,8 +125,10 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected void logout() {
 
                 /* Logout if mProvider is not null */
+        FirebaseAuth mAuth;
+        mAuth= FirebaseAuth.getInstance();
+        mAuth.signOut();
 
-                    mFirebaseRef.unauth();
 
 
 

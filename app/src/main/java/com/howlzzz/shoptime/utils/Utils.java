@@ -2,6 +2,8 @@ package com.howlzzz.shoptime.utils;
 
 import android.content.Context;
 
+import com.howlzzz.shoptime.model.ShopTime;
+
 import java.text.SimpleDateFormat;
 
 /**
@@ -20,6 +22,11 @@ public class Utils {
      */
     public Utils(Context con) {
         mContext = con;
+    }
+
+    public static boolean checkIfOwner(ShopTime shoppingList, String currentUserEmail) {
+        return (shoppingList.getOwner() != null &&
+                shoppingList.getOwner().equals(currentUserEmail));
     }
 
     public static String encodeEmail(String userEmail) {

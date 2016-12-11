@@ -25,6 +25,7 @@ import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.model.ShoppingListItem;
 import com.howlzzz.shoptime.ui.BaseActivity;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 /**
  * Represents the details screen for the selected shopping list
@@ -33,6 +34,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
     private static final String LOG_TAG = ActiveListDetailsActivity.class.getSimpleName();
     private ListView mListView;
     private String mListId;
+    private boolean mCurrentUserIsOwner = false;
     private Firebase mActiveListRef;
     private ActiveListItemAdapter mActiveListItemAdapter;
     private ShopTime mShoppingList;
@@ -95,6 +97,9 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
                 //mActiveListItemAdapter.setShoppingList(mShoppingList);
                 mActiveListItemAdapter.setShoppingList(mShoppingList);
+
+                /* Check if the current user is owner */
+                mCurrentUserIsOwner = Utils.checkIfOwner(shoppingList, mEncodedEmail);
                 /* Calling invalidateOptionsMenu causes onCreateOptionsMenu to be called */
                 invalidateOptionsMenu();
 
@@ -169,8 +174,8 @@ public class ActiveListDetailsActivity extends BaseActivity {
         MenuItem archive = menu.findItem(R.id.action_archive);
 
         /* Only the edit and remove options are implemented */
-        remove.setVisible(true);
-        edit.setVisible(true);
+        remove.setVisible(mCurrentUserIsOwner);
+        edit.setVisible(mCurrentUserIsOwner);
         share.setVisible(false);
         archive.setVisible(false);
 
