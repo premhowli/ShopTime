@@ -31,6 +31,7 @@ import java.util.Date;
  */
 public class ShoppingListsFragment extends Fragment {
     private ListView mListView;
+    String mEncodedEmail;
     /*private TextView mTextViewListName;
     private TextView mTextViewOwner;
     private TextView mTextViewTime;
@@ -46,9 +47,11 @@ public class ShoppingListsFragment extends Fragment {
      * Create fragment and pass bundle with data as it's arguments
      * Right now there are not arguments...but eventually there will be.
      */
-    public static ShoppingListsFragment newInstance() {
+    public static ShoppingListsFragment newInstance(String encodedEmail) {
         ShoppingListsFragment fragment = new ShoppingListsFragment();
+
         Bundle args = new Bundle();
+        args.putString(Constants.KEY_ENCODED_EMAIL,encodedEmail);
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,6 +68,7 @@ public class ShoppingListsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
         if (getArguments() != null) {
         }
     }
@@ -98,6 +102,7 @@ public class ShoppingListsFragment extends Fragment {
                       */
                                         String listId = mActiveListAdapter.getRef(position).getKey();
                                         intent.putExtra(Constants.KEY_LIST_ID, listId);
+                                   intent.putExtra(Constants.KEY_ENCODED_EMAIL,mEncodedEmail);
                                         /* Starts an active showing the details for the selected list */
                                                 startActivity(intent);
                                     }

@@ -12,6 +12,7 @@ import java.util.HashMap;
 public class ShopTime {
     String listName;
     String owner;
+    String email;
     @JsonProperty
     private Object created;
     /*private HashMap<String, Object> dateCreated;
@@ -20,9 +21,11 @@ public class ShopTime {
     public ShopTime() {
     }
 
-    public ShopTime(String listName, String owner) {
+    public ShopTime(String listName, String email,String owner) {
         this.listName = listName;
+        this.email=email;
         this.owner = owner;
+
         //this.dateCreated = dateCreated;
         this.created = ServerValue.TIMESTAMP;
 
@@ -56,4 +59,6 @@ public class ShopTime {
     public String getListName() {
         return listName;
     }
+    public String getEmail(){
+        return email; }
 }

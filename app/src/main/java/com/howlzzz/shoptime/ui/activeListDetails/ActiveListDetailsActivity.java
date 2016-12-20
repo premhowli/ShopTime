@@ -1,8 +1,10 @@
 package com.howlzzz.shoptime.ui.activeListDetails;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.Toolbar;
@@ -12,7 +14,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -33,7 +37,7 @@ import com.howlzzz.shoptime.utils.Utils;
 public class ActiveListDetailsActivity extends BaseActivity {
     private static final String LOG_TAG = ActiveListDetailsActivity.class.getSimpleName();
     private ListView mListView;
-    private String mListId;
+    private String mListId,mEmail;
     private boolean mCurrentUserIsOwner = false;
     private Firebase mActiveListRef;
     private ActiveListItemAdapter mActiveListItemAdapter;
@@ -57,6 +61,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         /* Get the push ID from the extra passed by ShoppingListFragment */
                Intent intent = this.getIntent();
                 mListId = intent.getStringExtra(Constants.KEY_LIST_ID);
+                mEmail=intent.getStringExtra(Constants.KEY_ENCODED_EMAIL);
                 if (mListId == null) {
                     /* No point in continuing without a valid ID. */
                                 finish();
@@ -96,10 +101,23 @@ public class ActiveListDetailsActivity extends BaseActivity {
                 mShoppingList = shoppingList;
 
                 //mActiveListItemAdapter.setShoppingList(mShoppingList);
+
+
+
+
                 mActiveListItemAdapter.setShoppingList(mShoppingList);
 
+                Log.e(LOG_TAG," mEncodeEmail "+" "+mEmail);
                 /* Check if the current user is owner */
-                mCurrentUserIsOwner = Utils.checkIfOwner(shoppingList, mEncodedEmail);
+                mCurrentUserIsOwner = Utils.checkIfOwner(mShoppingList, mEmail);
+                if(mCurrentUserIsOwner){
+                    Log.e(LOG_TAG,
+                            "OWner found");
+                }
+                else{
+                    Log.e(LOG_TAG,
+                            "OWner not found"+"  "+mShoppingList.getEmail()+ "  "+mEmail);
+                }
                 /* Calling invalidateOptionsMenu causes onCreateOptionsMenu to be called */
                 invalidateOptionsMenu();
 
@@ -283,7 +301,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void showAddListItemDialog(View view) {
         /* Create an instance of the dialog fragment and show it */
         FragmentManager fm=getSupportFragmentManager();
-        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail);
+        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail,mDisplayName);
         dia.show(fm,"AddListItemDialogShow");
 
         /*android.support.v4.app.DialogFragment dialog = AddListItemDialogFragment.newInstance(mShoppingList);
@@ -297,7 +315,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         /* Create an instance of the dialog fragment and show it */
 
         FragmentManager fm=getSupportFragmentManager();
-        EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail);
+        EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail,mDisplayName);
         dia.show(fm,"EditListNameDialogShow");
 
 
@@ -319,7 +337,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
 
         FragmentManager fm=getSupportFragmentManager();
-        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId, mEncodedEmail);
+        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId, mEncodedEmail,mDisplayName);
         dia.show(fm,"EditListItemNameShow");
 
         /* Create an instance of the dialog fragment and show it */

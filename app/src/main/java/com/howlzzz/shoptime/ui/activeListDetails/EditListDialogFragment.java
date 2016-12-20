@@ -26,7 +26,7 @@ import com.howlzzz.shoptime.utils.Constants;
 public abstract class EditListDialogFragment extends DialogFragment {
     EditText mEditTextForList;
     int mResource;
-    String mListId, mOwner, mEncodedEmail;
+    String mListId, mOwner, mEncodedEmail,mDisplayName;
 
 
     /**
@@ -37,12 +37,13 @@ public abstract class EditListDialogFragment extends DialogFragment {
      * @param resource
      * @return
      */
-    protected static Bundle newInstanceHelper(ShopTime shoppingList, int resource,String listId,String encodedEmail) {
+    protected static Bundle newInstanceHelper(ShopTime shoppingList, int resource,String listId,String encodedEmail,String displayName) {
         Bundle bundle = new Bundle();
         bundle.putString(Constants.KEY_LIST_ID,listId);
         bundle.putInt(Constants.KEY_LAYOUT_RESOURCE, resource);
         bundle.putString(Constants.KEY_LIST_OWNER, shoppingList.getOwner());
         bundle.putString(Constants.KEY_ENCODED_EMAIL, encodedEmail);
+        bundle.putString(Constants.KEY_DISPLAY_NAME,displayName);
         return bundle;
     }
 
@@ -56,6 +57,7 @@ public abstract class EditListDialogFragment extends DialogFragment {
         mResource = getArguments().getInt(Constants.KEY_LAYOUT_RESOURCE);
         mOwner = getArguments().getString(Constants.KEY_LIST_OWNER);
         mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
+        mDisplayName=getArguments().getString(Constants.KEY_DISPLAY_NAME);
     }
 
     /**

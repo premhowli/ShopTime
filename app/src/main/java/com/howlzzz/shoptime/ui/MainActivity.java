@@ -26,6 +26,7 @@ import com.howlzzz.shoptime.ui.activeLists.ShoppingListsFragment;
 import com.howlzzz.shoptime.ui.meals.AddMealDialogFragment;
 import com.howlzzz.shoptime.ui.meals.MealsFragment;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 /**
  * Represents the home screen of the app which
@@ -44,7 +45,7 @@ public class MainActivity extends BaseActivity {
         FirebaseApp.initializeApp(this);
         Firebase.setAndroidContext(getApplicationContext());
 
-        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
+        mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(Utils.encodeEmail(mEncodedEmail));
 
         /**
          * Link layout elements from XML and setup the toolbar
@@ -141,7 +142,7 @@ public class MainActivity extends BaseActivity {
     public void showAddListDialog(View view) {
         /* Create an instance of the dialog fragment and show it */
         //DialogFragment dialog = AddListDialogFragment.newInstance();
-        DialogFragment dialog = AddListDialogFragment.newInstance(mEncodedEmail);
+        DialogFragment dialog = AddListDialogFragment.newInstance(mEncodedEmail,mDisplayName);
         dialog.show(MainActivity.this.getFragmentManager(), "AddListDialogFragment");
     }
 
@@ -178,13 +179,13 @@ public class MainActivity extends BaseActivity {
              */
             switch (position) {
                 case 0:
-                    fragment = ShoppingListsFragment.newInstance();
+                    fragment = ShoppingListsFragment.newInstance(mEncodedEmail);
                     break;
                 case 1:
                     fragment = MealsFragment.newInstance();
                     break;
                 default:
-                    fragment = ShoppingListsFragment.newInstance();
+                    fragment = ShoppingListsFragment.newInstance(mEncodedEmail);
                     break;
             }
 

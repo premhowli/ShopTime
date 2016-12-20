@@ -7,9 +7,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.firebase.client.AuthData;
 import com.firebase.client.Firebase;
@@ -27,6 +29,7 @@ import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ui.login.CreateAccountActivity;
 import com.howlzzz.shoptime.ui.login.LoginActivity;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 /**
  * BaseActivity class is used as a base class for all activities in the app
@@ -38,7 +41,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
 
     protected GoogleApiClient mGoogleApiClient;
 
-    protected String mProvider, mEncodedEmail;
+    protected String mProvider, mEncodedEmail,mDisplayName;
     private Firebase.AuthStateListener mAuthListener;
     private Firebase mFirebaseRef;
 
@@ -64,6 +67,11 @@ public abstract class BaseActivity extends AppCompatActivity implements
                 .addApi(AppIndex.API).build();
 
         mEncodedEmail = settings.getString(Constants.KEY_ENCODED_EMAIL, null);
+        mDisplayName = settings.getString(Constants.KEY_DISPLAY_NAME,null);
+        Log.e("tag","BaseActivity  "+mEncodedEmail+"  "+mDisplayName);
+        /*Toast.makeText(BaseActivity.this,mEncodedEmail,Toast.LENGTH_SHORT);
+        Toast.makeText(BaseActivity.this,mDisplayName,Toast.LENGTH_LONG);*/
+
 
         if (!((this instanceof LoginActivity) || (this instanceof CreateAccountActivity))) {
             mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
@@ -75,7 +83,8 @@ public abstract class BaseActivity extends AppCompatActivity implements
                                     /* Clear out shared preferences */
                         SharedPreferences.Editor spe = settings.edit();
                         spe.putString(Constants.KEY_ENCODED_EMAIL, null);
-
+                        spe.putString(Constants.KEY_DISPLAY_NAME, null);
+                        spe.commit();
 
                         takeUserToLoginScreenOnUnAuth();
                     }

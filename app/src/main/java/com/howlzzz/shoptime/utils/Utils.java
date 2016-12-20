@@ -1,6 +1,8 @@
 package com.howlzzz.shoptime.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 import com.howlzzz.shoptime.model.ShopTime;
 
@@ -25,12 +27,14 @@ public class Utils {
     }
 
     public static boolean checkIfOwner(ShopTime shoppingList, String currentUserEmail) {
-        return (shoppingList.getOwner() != null &&
-                shoppingList.getOwner().equals(currentUserEmail));
+        //final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        return (shoppingList.getEmail() != null &&
+                shoppingList.getEmail().equals(currentUserEmail));
     }
 
     public static String encodeEmail(String userEmail) {
         return userEmail.replace(".", ",");
     }
+
 
 }

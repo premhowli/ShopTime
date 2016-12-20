@@ -26,10 +26,10 @@ import java.util.Map;
 public class AddListItemDialogFragment extends EditListDialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    public static AddListItemDialogFragment newInstance(ShopTime shoppingList,String listId,String encodedEmail) {
+    public static AddListItemDialogFragment newInstance(ShopTime shoppingList,String listId,String encodedEmail,String displayName) {
         AddListItemDialogFragment addListItemDialogFragment = new AddListItemDialogFragment();
 
-        Bundle bundle = newInstanceHelper(shoppingList, R.layout.dialog_add_item,listId,encodedEmail);
+        Bundle bundle = newInstanceHelper(shoppingList, R.layout.dialog_add_item,listId,encodedEmail,displayName);
         addListItemDialogFragment.setArguments(bundle);
 
         return addListItemDialogFragment;
