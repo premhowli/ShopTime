@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.firebase.client.Firebase;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -29,6 +30,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ui.BaseActivity;
 import com.howlzzz.shoptime.ui.MainActivity;
+import com.howlzzz.shoptime.utils.Constants;
 
 
 /**
@@ -184,6 +186,8 @@ public class GoogleSignInActivity extends BaseActivity implements
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                        /*String emailEn=mAuth.getCurrentUser().getEmail();
+                        Firebase ref=new Firebase(Constants.FIREBASE_URL_USERS).child(emailEn);*/
 
                         // If sign in fails, display a message to the user. If sign in succeeds
                         // the auth state listener will be notified and logic to handle the

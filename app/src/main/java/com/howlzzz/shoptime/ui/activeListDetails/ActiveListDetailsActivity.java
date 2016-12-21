@@ -31,6 +31,8 @@ import com.howlzzz.shoptime.ui.BaseActivity;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 
+import java.util.HashMap;
+
 /**
  * Represents the details screen for the selected shopping list
  */
@@ -77,8 +79,8 @@ public class ActiveListDetailsActivity extends BaseActivity {
         initializeScreen();
         /* Calling invalidateOptionsMenu causes onCreateOptionsMenu to be called */
         invalidateOptionsMenu();
-
-        mActiveListItemAdapter = new ActiveListItemAdapter(this, ShoppingListItem.class,R.layout.single_active_list_item, listItemsRef, mListId);
+        Log.e("Activelistdetailsactivity",mEmail);
+        mActiveListItemAdapter = new ActiveListItemAdapter(this, ShoppingListItem.class,R.layout.single_active_list_item, listItemsRef, mListId,mEmail);
          /* Create ActiveListItemAdapter and set to listView */
                 mListView.setAdapter(mActiveListItemAdapter);
 
@@ -176,6 +178,47 @@ public class ActiveListDetailsActivity extends BaseActivity {
             return false;
         }
     });
+        ////debug start
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                        /* Check that the view is not the empty footer item */
+                        if (view.getId() != R.id.list_view_footer_empty) {
+                            final ShoppingListItem selectedListItem = mActiveListItemAdapter.getItem(position);
+                            String itemId = mActiveListItemAdapter.getRef(position).getKey();
+
+                            if (selectedListItem != null) {
+
+                                    /* Create map and fill it in with deep path multi write operations list */
+                                HashMap<String, Object> updatedItemBoughtData = new HashMap<String, Object>();
+                                           /* Buy selected item if it is NOT already bought */
+                                if (!selectedListItem.isBought()) {
+                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT, true);
+                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT_BY, mEmail);
+                                } else {
+                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT, false);
+                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT_BY, null);
+                                }
+
+                                    /* Do update */
+                                Firebase firebaseItemLocation = new Firebase(Constants.FIREBASE_URL_SHOPPING_LIST_ITEMS)
+                                        .child(mListId).child(itemId);
+                                firebaseItemLocation.updateChildren(updatedItemBoughtData, new Firebase.CompletionListener() {
+                                    @Override
+                                    public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                                        if (firebaseError != null) {
+                                            Log.d(LOG_TAG, getString(R.string.log_error_updating_data) +
+                                                    firebaseError.getMessage());
+                                        }
+                                 }
+                                });
+                            }
+                        }
+                    }
+                });
+
+                ////debug end
+
 }
 
     @Override
@@ -301,7 +344,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void showAddListItemDialog(View view) {
         /* Create an instance of the dialog fragment and show it */
         FragmentManager fm=getSupportFragmentManager();
-        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail,mDisplayName);
+        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEmail,mDisplayName);
         dia.show(fm,"AddListItemDialogShow");
 
         /*android.support.v4.app.DialogFragment dialog = AddListItemDialogFragment.newInstance(mShoppingList);
@@ -315,7 +358,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         /* Create an instance of the dialog fragment and show it */
 
         FragmentManager fm=getSupportFragmentManager();
-        EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId, mEncodedEmail,mDisplayName);
+        EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId, mEmail,mDisplayName);
         dia.show(fm,"EditListNameDialogShow");
 
 
@@ -337,7 +380,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
 
         FragmentManager fm=getSupportFragmentManager();
-        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId, mEncodedEmail,mDisplayName);
+        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId, mEmail,mDisplayName);
         dia.show(fm,"EditListItemNameShow");
 
         /* Create an instance of the dialog fragment and show it */
