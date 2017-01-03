@@ -13,6 +13,7 @@ public class ShopTime {
     String listName;
     String owner;
     String email;
+    private HashMap<String, User> usersShopping;
     @JsonProperty
     private Object created;
     /*private HashMap<String, Object> dateCreated;
@@ -25,6 +26,7 @@ public class ShopTime {
         this.listName = listName;
         this.email=email;
         this.owner = owner;
+        this.usersShopping = new HashMap<>();
 
         //this.dateCreated = dateCreated;
         this.created = ServerValue.TIMESTAMP;
@@ -51,6 +53,10 @@ public class ShopTime {
     public Object getCreated() {
         return created;
     }
+
+    public HashMap getUsersShopping() {
+                return usersShopping;
+          }
 
     public String getOwner() {
         return owner;

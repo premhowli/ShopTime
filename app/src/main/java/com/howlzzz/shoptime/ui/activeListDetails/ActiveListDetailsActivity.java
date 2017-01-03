@@ -1,5 +1,6 @@
 package com.howlzzz.shoptime.ui.activeListDetails;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -7,12 +8,14 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -27,7 +30,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.model.ShoppingListItem;
+import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.ui.BaseActivity;
+import com.howlzzz.shoptime.ui.MainActivity;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 
@@ -39,12 +44,16 @@ import java.util.HashMap;
 public class ActiveListDetailsActivity extends BaseActivity {
     private static final String LOG_TAG = ActiveListDetailsActivity.class.getSimpleName();
     private ListView mListView;
-    private String mListId,mEmail;
+    private String mListId,mEmail,mEmailEncoded;
     private boolean mCurrentUserIsOwner = false;
-    private Firebase mActiveListRef;
+    private Firebase mActiveListRef,mCurrentUserRef;
     private ActiveListItemAdapter mActiveListItemAdapter;
     private ShopTime mShoppingList;
-    private ValueEventListener mActiveListRefListener;
+    private ValueEventListener mActiveListRefListener, mCurrentUserRefListener;
+    private Button mButtonShopping;
+    private User mCurrentUser;
+        /* Stores whether the current user is shopping */
+    private boolean mShopping = false;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -64,6 +73,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
                Intent intent = this.getIntent();
                 mListId = intent.getStringExtra(Constants.KEY_LIST_ID);
                 mEmail=intent.getStringExtra(Constants.KEY_ENCODED_EMAIL);
+        mEmailEncoded=Utils.encodeEmail(mEmail);
                 if (mListId == null) {
                     /* No point in continuing without a valid ID. */
                                 finish();
@@ -71,6 +81,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
                 }
 
         mActiveListRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS).child(mListId);
+        mCurrentUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(Utils.encodeEmail(mEmailEncoded));
         Firebase listItemsRef = new Firebase(Constants.FIREBASE_URL_SHOPPING_LIST_ITEMS).child(mListId);
         /**
          * Link layout elements from XML and setup the toolbar
@@ -78,6 +89,27 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
         initializeScreen();
         /* Calling invalidateOptionsMenu causes onCreateOptionsMenu to be called */
+
+        mCurrentUserRefListener = mCurrentUserRef.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            User currentUser = dataSnapshot.getValue(User.class);
+                            if (currentUser != null) mCurrentUser = currentUser;
+                            else finish();
+                        }
+
+                        @Override
+                        public void onCancelled(FirebaseError firebaseError) {
+                            Log.e(LOG_TAG,
+                                    getString(R.string.log_error_the_read_failed)+
+                                            firebaseError.getMessage());
+                        }
+                    });
+
+                final Activity thisActivity = this;
+
+
+
         invalidateOptionsMenu();
         Log.e("Activelistdetailsactivity",mEmail);
         mActiveListItemAdapter = new ActiveListItemAdapter(this, ShoppingListItem.class,R.layout.single_active_list_item, listItemsRef, mListId,mEmail);
@@ -125,6 +157,21 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
                 /* Set title appropriately. */
                 setTitle(shoppingList.getListName());
+
+
+                HashMap<String, User> usersShopping = mShoppingList.getUsersShopping();
+                               if (usersShopping != null && usersShopping.size() != 0 &&
+                                        usersShopping.containsKey(mEmailEncoded)) {
+                                    mShopping = true;
+                                    mButtonShopping.setText(getString(R.string.button_stop_shopping));
+                                    mButtonShopping.setBackgroundColor(ContextCompat.getColor(ActiveListDetailsActivity.this, R.color.dark_grey));
+                                } else {
+                                    mButtonShopping.setText(getString(R.string.button_start_shopping));
+                                    mButtonShopping.setBackgroundColor(ContextCompat.getColor(ActiveListDetailsActivity.this, R.color.primary_dark));
+                                    mShopping = false;
+                                }
+
+
             }
 
             @Override
@@ -168,7 +215,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
                 ShoppingListItem shoppingListItem = mActiveListItemAdapter.getItem(position);
 
                                     if (shoppingListItem != null) {
-                                       String itemName = shoppingListItem.getItemName();
+                                        String itemName = shoppingListItem.getItemName();
                                         String itemId = mActiveListItemAdapter.getRef(position).getKey();
 
                                         showEditListItemNameDialog(itemName, itemId);
@@ -189,29 +236,40 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
                             if (selectedListItem != null) {
 
+                                /* If current user is shopping */
+                                if (mShopping) {
+
                                     /* Create map and fill it in with deep path multi write operations list */
-                                HashMap<String, Object> updatedItemBoughtData = new HashMap<String, Object>();
+                                    HashMap<String, Object> updatedItemBoughtData = new HashMap<String, Object>();
                                            /* Buy selected item if it is NOT already bought */
-                                if (!selectedListItem.isBought()) {
-                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT, true);
-                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT_BY, mEmail);
-                                } else {
-                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT, false);
-                                    updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT_BY, null);
-                                }
+                                    if (!selectedListItem.isBought()) {
+                                        updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT, true);
+                                        updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT_BY, mEmail);
+                                    } else {
+                                        updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT, false);
+                                        updatedItemBoughtData.put(Constants.FIREBASE_PROPERTY_BOUGHT_BY, null);
+                                    }
 
                                     /* Do update */
-                                Firebase firebaseItemLocation = new Firebase(Constants.FIREBASE_URL_SHOPPING_LIST_ITEMS)
-                                        .child(mListId).child(itemId);
-                                firebaseItemLocation.updateChildren(updatedItemBoughtData, new Firebase.CompletionListener() {
-                                    @Override
-                                    public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-                                        if (firebaseError != null) {
-                                            Log.d(LOG_TAG, getString(R.string.log_error_updating_data) +
-                                                    firebaseError.getMessage());
+                                    Firebase firebaseItemLocation = new Firebase(Constants.FIREBASE_URL_SHOPPING_LIST_ITEMS)
+                                            .child(mListId).child(itemId);
+                                    firebaseItemLocation.updateChildren(updatedItemBoughtData, new Firebase.CompletionListener() {
+                                        @Override
+                                        public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+                                            if (firebaseError != null) {
+                                                Log.d(LOG_TAG, getString(R.string.log_error_updating_data) +
+                                                        firebaseError.getMessage());
+                                            }
+
                                         }
-                                 }
-                                });
+                                    });
+                                }
+                                else{
+
+                                    /*Toast.makeText(getApplicationContext(),"Better first go to shopping mode",Toast.LENGTH_LONG);
+                                    Log.e(LOG_TAG,"shopping mode set first");*/
+                                }
+
                             }
                         }
                     }
@@ -290,6 +348,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         super.onDestroy();
         mActiveListItemAdapter.cleanup();
         mActiveListRef.removeEventListener(mActiveListRefListener);
+        mCurrentUserRef.removeEventListener(mCurrentUserRefListener);
     }
 
     /**
@@ -298,6 +357,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
     private void initializeScreen() {
         mListView = (ListView) findViewById(R.id.list_view_shopping_list_items);
         Toolbar toolbar = (Toolbar) findViewById(R.id.app_bar);
+        mButtonShopping = (Button) findViewById(R.id.button_shopping);
         /* Common toolbar setup */
         setSupportActionBar(toolbar);
         /* Add back button to the action bar */
@@ -392,7 +452,18 @@ public class ActiveListDetailsActivity extends BaseActivity {
      * This method is called when user taps "Start/Stop shopping" button
      */
     public void toggleShopping(View view) {
-
+        /**
+         +         * If current user is already shopping, remove current user from usersShopping map
+         +         */
+                Firebase usersShoppingRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS)
+                        .child(mListId).child(Constants.FIREBASE_PROPERTY_USERS_SHOPPING)
+                        .child(mEmailEncoded);
+                /* Either add or remove the current user from the usersShopping map */
+                if (mShopping) {
+                    usersShoppingRef.removeValue();
+                } else {
+                    usersShoppingRef.setValue(mCurrentUser);
+                }
     }
 
     @Override
