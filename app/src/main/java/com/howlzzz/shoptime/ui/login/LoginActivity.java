@@ -66,9 +66,11 @@ public class LoginActivity extends BaseActivity implements
     /* A dialog that is presented until the Firebase authentication finished. */
     private ProgressDialog mAuthProgressDialog;
     private EditText mEditTextEmailInput, mEditTextPasswordInput;
+    private SharedPreferences mSharedPref;
     SharedPreferences.Editor editor;
     private String PREFS_KEY="email";
     private String mUserName, mUserEmail;
+    private Firebase.AuthStateListener mAuthStateListener;
 
 
 
@@ -87,17 +89,47 @@ public class LoginActivity extends BaseActivity implements
     /* A Google account object that is populated if the user signs in with Google */
     GoogleSignInAccount mGoogleAccount;
     private Firebase mFirebaseRef;
-    SharedPreferences sp;
+    private SharedPreferences sp;
     private FirebaseAuth.AuthStateListener mAuthListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+        sp = PreferenceManager.getDefaultSharedPreferences(this);
         Firebase.setAndroidContext(this);
 
 
+
+
+        /**
+         * Link layout elements from XML and setup progress dialog
+         */
+
+        mAuth = FirebaseAuth.getInstance();
+
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    // User is signed in
+                    Log.d(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    // User is signed out
+                    Log.d(LOG_TAG, "onAuthStateChanged:signed_out");
+                    //setContentView(R.layout.activity_login);
+                }
+                // [START_EXCLUDE]
+                //updateUI(user);
+                // [END_EXCLUDE]
+            }
+        };
+        setContentView(R.layout.activity_login);
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
 
         //setting up google api
@@ -111,33 +143,7 @@ public class LoginActivity extends BaseActivity implements
                 .addConnectionCallbacks((GoogleApiClient.ConnectionCallbacks) this)
                 .addOnConnectionFailedListener(this)
                 .build();
-
-        /**
-         * Link layout elements from XML and setup progress dialog
-         */
         initializeScreen();
-        mAuth = FirebaseAuth.getInstance();
-
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    // User is signed in
-                    Log.d(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    /*Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                    finish();*/
-                } else {
-                    // User is signed out
-                    Log.d(LOG_TAG, "onAuthStateChanged:signed_out");
-                }
-                // [START_EXCLUDE]
-                //updateUI(user);
-                // [END_EXCLUDE]
-            }
-        };
 
         /**
          * Call signInPassword() when user taps "Done" keyboard action
@@ -176,11 +182,33 @@ public class LoginActivity extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+
+        mAuthStateListener = new Firebase.AuthStateListener() {
+                        @Override
+                        public void onAuthStateChanged(AuthData authData) {
+                            mAuthProgressDialog.dismiss();
+
+                            /**
+                         +                 * If there is a valid session to be restored, start MainActivity.
+                         +                 * No need to pass data via SharedPreferences because app
+                         +                 * already holds userName/provider data from the latest session
+                         +                 */
+                            if (authData != null) {
+                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                                finish();
+                            }
+                        }
+                   };
+                /* Add auth listener to Firebase ref */
+                mFirebaseRef.addAuthStateListener(mAuthStateListener);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        mFirebaseRef.removeAuthStateListener(mAuthStateListener);
     }
 
     /**
@@ -384,9 +412,11 @@ public class LoginActivity extends BaseActivity implements
                             String displayName= acct.getDisplayName().toString();
                             String encodeEmail=(acct.getEmail().toString());
                             Log.e(LOG_TAG,"settings   "+displayName+"   "+encodeEmail);
-                            editor.putString(Constants.KEY_DISPLAY_NAME, displayName);
-                            editor.putString(Constants.KEY_ENCODED_EMAIL,encodeEmail);
+                            editor.clear();
+                            editor.putString(Constants.KEY_DISPLAY_NAME, displayName).apply();
+                            editor.putString(Constants.KEY_ENCODED_EMAIL,encodeEmail).apply();
                             editor.commit();
+                            finish();
                             encodeEmail=Utils.encodeEmail(acct.getEmail().toString());
                             mAuthProgressDialog.hide();
                             Intent intent=new Intent(LoginActivity.this,MainActivity.class);

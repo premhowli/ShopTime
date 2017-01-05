@@ -49,6 +49,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         final SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Firebase.setAndroidContext(this);
 
         /* Setup the Google API object to allow Google logins */
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -73,14 +74,14 @@ public abstract class BaseActivity extends AppCompatActivity implements
         Toast.makeText(BaseActivity.this,mDisplayName,Toast.LENGTH_LONG);*/
 
 
-        if (!((this instanceof LoginActivity) || (this instanceof CreateAccountActivity))) {
+        /*if (!((this instanceof LoginActivity) *//*|| (this instanceof MainActivity)*//*)) {
             mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
             mAuthListener = new Firebase.AuthStateListener() {
                 @Override
                 public void onAuthStateChanged(AuthData authData) {
-                                 /* The user has been logged out */
+                                 *//* The user has been logged out *//*
                     if (authData == null) {
-                                    /* Clear out shared preferences */
+                                    *//* Clear out shared preferences *//*
                         SharedPreferences.Editor spe = settings.edit();
                         spe.putString(Constants.KEY_ENCODED_EMAIL, null);
                         spe.putString(Constants.KEY_DISPLAY_NAME, null);
@@ -91,7 +92,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
                 }
             };
             mFirebaseRef.addAuthStateListener(mAuthListener);
-        }
+        }*/
 
     }
 
