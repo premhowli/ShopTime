@@ -115,7 +115,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
         invalidateOptionsMenu();
         Log.e("Activelistdetailsactivity",mEmail);
-        mActiveListItemAdapter = new ActiveListItemAdapter(this, ShoppingListItem.class,R.layout.single_active_list_item, listItemsRef, mListId,mEmail);
+        mActiveListItemAdapter = new ActiveListItemAdapter(this, ShoppingListItem.class,R.layout.single_active_list_item, listItemsRef.orderByChild(Constants.FIREBASE_PROPERTY_BOUGHT_BY), mListId,mEmail);
          /* Create ActiveListItemAdapter and set to listView */
                 mListView.setAdapter(mActiveListItemAdapter);
 

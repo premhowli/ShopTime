@@ -1,6 +1,7 @@
 package com.howlzzz.shoptime.ui;
 
 import android.app.DialogFragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,7 @@ import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.ui.activeLists.AddListDialogFragment;
 import com.howlzzz.shoptime.ui.activeLists.ShoppingListsFragment;
+import com.howlzzz.shoptime.ui.login.LoginActivity;
 import com.howlzzz.shoptime.ui.meals.AddMealDialogFragment;
 import com.howlzzz.shoptime.ui.meals.MealsFragment;
 import com.howlzzz.shoptime.utils.Constants;
@@ -44,6 +46,13 @@ public class MainActivity extends BaseActivity {
 
         FirebaseApp.initializeApp(this);
         Firebase.setAndroidContext(getApplicationContext());
+
+        if (mEncodedEmail.equals(null)){
+            Intent intent=new Intent(MainActivity.this,LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
 
         mUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(Utils.encodeEmail(mEncodedEmail));
 
@@ -105,7 +114,18 @@ public class MainActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //int id = item.getItemId();
+
+        int id = item.getItemId();
+                /**
+         +         * Open SettingsActivity with sort options when Sort icon was clicked
+         +         */
+                if (id == R.id.action_sort) {
+                    startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+                    return true;
+                 }
+
         return super.onOptionsItemSelected(item);
+
     }
 
 

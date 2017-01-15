@@ -74,25 +74,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
         Toast.makeText(BaseActivity.this,mDisplayName,Toast.LENGTH_LONG);*/
 
 
-        /*if (!((this instanceof LoginActivity) *//*|| (this instanceof MainActivity)*//*)) {
-            mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
-            mAuthListener = new Firebase.AuthStateListener() {
-                @Override
-                public void onAuthStateChanged(AuthData authData) {
-                                 *//* The user has been logged out *//*
-                    if (authData == null) {
-                                    *//* Clear out shared preferences *//*
-                        SharedPreferences.Editor spe = settings.edit();
-                        spe.putString(Constants.KEY_ENCODED_EMAIL, null);
-                        spe.putString(Constants.KEY_DISPLAY_NAME, null);
-                        spe.commit();
 
-                        takeUserToLoginScreenOnUnAuth();
-                    }
-                }
-            };
-            mFirebaseRef.addAuthStateListener(mAuthListener);
-        }*/
 
     }
 
@@ -100,7 +82,7 @@ public abstract class BaseActivity extends AppCompatActivity implements
     public void onDestroy() {
         super.onDestroy();
         if (!((this instanceof LoginActivity) || (this instanceof CreateAccountActivity))) {
-               mFirebaseRef.removeAuthStateListener(mAuthListener);
+               //mFirebaseRef.removeAuthStateListener(mAuthListener);
                     }
     }
 
