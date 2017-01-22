@@ -19,12 +19,14 @@ import com.firebase.client.FirebaseError;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.ShopTime;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 import java.util.HashMap;
 
 
 public class RemoveListDialogFragment extends DialogFragment {
     String mListId;
+    String mListOwner;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     final static String LOG_TAG = RemoveListDialogFragment.class.getSimpleName();
@@ -36,6 +38,7 @@ public class RemoveListDialogFragment extends DialogFragment {
         RemoveListDialogFragment removeListDialogFragment = new RemoveListDialogFragment();
         Bundle bundle = new Bundle();
         bundle.putString(Constants.KEY_LIST_ID, listId);
+        bundle.putString(Constants.KEY_LIST_OWNER, shoppingList.getOwner());
         removeListDialogFragment.setArguments(bundle);
         return removeListDialogFragment;
     }
@@ -47,6 +50,7 @@ public class RemoveListDialogFragment extends DialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mListId = getArguments().getString(Constants.KEY_LIST_ID);
+        mListOwner = getArguments().getString(Constants.KEY_LIST_OWNER);
     }
 
     @Override
@@ -73,6 +77,7 @@ public class RemoveListDialogFragment extends DialogFragment {
     }
 
     private void removeList() {
+        Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);
 
         // TODO Now that you have shopping list items in your database, you need to delete
         // those as well as the shopping list itself. This should all be done in one write
@@ -84,10 +89,14 @@ public class RemoveListDialogFragment extends DialogFragment {
          */
         HashMap<String, Object> removeListData = new HashMap<String, Object>();
 
-        removeListData.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/"+ mListId, null);
-        removeListData.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/"+ mListId, null);
+        /*removeListData.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/"+ mListId, null);
+        removeListData.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/"+ mListId, null);*/
+        Utils.updateMapForAllWithValue(mListId, mListOwner, removeListData, "", null);
 
-        Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);
+        /*Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);*/
+
+        removeListData.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/" + mListId, null);
+
 
         /* Do a deep-path update */
         firebaseRef.updateChildren(removeListData, new Firebase.CompletionListener() {

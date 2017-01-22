@@ -41,6 +41,7 @@ public class ShoppingListsFragment extends Fragment {
 
     private TextView mTextViewEditTime;*/
     private ActiveListAdapter mActiveListAdapter;
+    private String mEmail;
 
     public ShoppingListsFragment() {
         /* Required empty public constructor */
@@ -71,7 +72,8 @@ public class ShoppingListsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
+        mEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
+        mEncodedEmail=Utils.encodeEmail(mEmail);
         if (getArguments() != null) {
         }
     }
@@ -135,7 +137,7 @@ public class ShoppingListsFragment extends Fragment {
             // When creating the adapter, you should grab the key/value pair that was set in SettingsActivity
             // and modify the Firebase query that is passed to the adapter accordingly.
                 Query orderedActiveUserListsRef;
-                Firebase activeListsRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS);
+        Firebase activeListsRef = new Firebase(Constants.FIREBASE_URL_USER_LISTS).child(mEncodedEmail);
                 /**
          +         * Sort active lists by "date created"
          +         * if it's been selected in the SettingsActivity

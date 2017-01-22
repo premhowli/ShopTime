@@ -36,9 +36,11 @@ import com.howlzzz.shoptime.ui.BaseActivity;
 import com.howlzzz.shoptime.ui.MainActivity;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
+import com.shaded.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents the details screen for the selected shopping list
@@ -48,10 +50,10 @@ public class ActiveListDetailsActivity extends BaseActivity {
     private ListView mListView;
     private String mListId,mEmail,mEmailEncoded;
     private boolean mCurrentUserIsOwner = false;
-    private Firebase mActiveListRef,mCurrentUserRef;
+    private Firebase mActiveListRef,mCurrentUserRef, mCurrentListRef,mFirebaseRef;
     private ActiveListItemAdapter mActiveListItemAdapter;
     private ShopTime mShoppingList;
-    private ValueEventListener mActiveListRefListener, mCurrentUserRefListener;
+    private ValueEventListener mActiveListRefListener, mCurrentUserRefListener, mCurrentListRefListener;
     private Button mButtonShopping;
     private User mCurrentUser;
     private TextView mTextViewPeopleShopping;
@@ -83,7 +85,9 @@ public class ActiveListDetailsActivity extends BaseActivity {
                     return;
                 }
 
-        mActiveListRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS).child(mListId);
+        //mActiveListRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS).child(mListId);
+        mFirebaseRef=new Firebase(Constants.FIREBASE_URL);
+        mCurrentListRef=new Firebase(Constants.FIREBASE_URL_USER_LISTS).child(mEmailEncoded).child(mListId);
         mCurrentUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(Utils.encodeEmail(mEmailEncoded));
         Firebase listItemsRef = new Firebase(Constants.FIREBASE_URL_SHOPPING_LIST_ITEMS).child(mListId);
         /**
@@ -122,7 +126,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
 
         //getting the proper name and set as title
-        mActiveListRefListener = mActiveListRef.addValueEventListener(new ValueEventListener() {
+        mCurrentListRefListener = mCurrentListRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ShopTime shoppingList = dataSnapshot.getValue(ShopTime.class);
@@ -352,7 +356,8 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void onDestroy() {
         super.onDestroy();
         mActiveListItemAdapter.cleanup();
-        mActiveListRef.removeEventListener(mActiveListRefListener);
+        //mActiveListRef.removeEventListener(mActiveListRefListener);
+        mCurrentListRef.removeEventListener(mCurrentListRefListener);
         mCurrentUserRef.removeEventListener(mCurrentUserRefListener);
     }
 
@@ -532,14 +537,40 @@ public class ActiveListDetailsActivity extends BaseActivity {
         /**
          +         * If current user is already shopping, remove current user from usersShopping map
          +         */
-                Firebase usersShoppingRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS)
+                /*Firebase usersShoppingRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS)
                         .child(mListId).child(Constants.FIREBASE_PROPERTY_USERS_SHOPPING)
-                        .child(mEmailEncoded);
+                        .child(mEmailEncoded);*/
+
+
+        HashMap<String, Object> updatedUserData = new HashMap<String, Object>();
+           String propertyToUpdate = Constants.FIREBASE_PROPERTY_USERS_SHOPPING + "/" + mEncodedEmail;
+
                 /* Either add or remove the current user from the usersShopping map */
                 if (mShopping) {
-                    usersShoppingRef.removeValue();
+
+                               /* Add the value to update at the specified property for all lists */
+                               Utils.updateMapForAllWithValue(mListId, mShoppingList.getOwner(), updatedUserData,
+                                       propertyToUpdate, null);
+                               /* Appends the timestamp changes for all lists */
+                               Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedUserData);
+
+
+                               /* Do a deep-path update */
+                               mFirebaseRef.updateChildren(updatedUserData);
                 } else {
-                    usersShoppingRef.setValue(mCurrentUser);
+                    /**
+                     +             * If current user is not shopping, create map to represent User model add to usersShopping map
+                     +             */
+                                HashMap<String, Object> currentUser = (HashMap<String, Object>)
+                                        new ObjectMapper().convertValue(mCurrentUser, Map.class);
+
+                                /* Add the value to update at the specified property for all lists */
+                                Utils.updateMapForAllWithValue(mListId, mShoppingList.getOwner(), updatedUserData, propertyToUpdate, currentUser);
+                                /* Appends the timestamp changes for all lists */
+                               Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedUserData);
+
+                                /* Do a deep-path update */
+                                mFirebaseRef.updateChildren(updatedUserData);
                 }
     }
 

@@ -17,6 +17,7 @@ import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.model.ShoppingListItem;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 import com.shaded.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
@@ -93,6 +94,7 @@ public class AddListItemDialogFragment extends EditListDialogFragment {
             //updatedItemToAddMap.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/" + mListId + "/" + Constants.FIREBASE_PROPERTY_TIMESTAMP_LAST_CHANGED, changedTimestampMap);
 
             /* Do the update */
+            Utils.updateMapWithTimestampLastChanged(mListId, mOwner, updatedItemToAddMap);
             firebaseRef.updateChildren(updatedItemToAddMap);
 
             /**

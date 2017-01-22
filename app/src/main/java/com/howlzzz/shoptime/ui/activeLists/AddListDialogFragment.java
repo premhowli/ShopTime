@@ -18,8 +18,11 @@ import com.firebase.client.ServerValue;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
+import com.shaded.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Adds a new shopping list
@@ -27,6 +30,7 @@ import java.util.HashMap;
 public class AddListDialogFragment extends DialogFragment {
     EditText mEditTextListName;
     String mEncodedEmail,mDisplayName;
+    private String mEmail;
 
     /**
      * Public static constructor that creates fragment and
@@ -47,7 +51,8 @@ public class AddListDialogFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
+        mEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
+        mEncodedEmail=Utils.encodeEmail(mEmail);
         mDisplayName=getArguments().getString(Constants.KEY_DISPLAY_NAME);
     }
 
@@ -120,11 +125,19 @@ public class AddListDialogFragment extends DialogFragment {
             /**
              * Create Firebase references
              */
-            Firebase listsRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS);
-            Firebase newListRef = listsRef.push();
+            //Firebase listsRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS);
+
 
             /* Save listsRef.push() to maintain same random Id */
+            Firebase userListsRef = new Firebase(Constants.FIREBASE_URL_USER_LISTS).child(mEncodedEmail);
+                        final Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);
+
+                        Firebase newListRef = userListsRef.push();
+
             final String listId = newListRef.getKey();
+
+
+            HashMap<String, Object> updateShoppingListData = new HashMap<>();
 
             /**
              * Set raw version of date to the ServerValue.TIMESTAMP value and save into
@@ -137,7 +150,14 @@ public class AddListDialogFragment extends DialogFragment {
             ShopTime newShoppingList = new ShopTime(userEnteredName, mEncodedEmail,mDisplayName);
 
             /* Add the shopping list */
-            newListRef.setValue(newShoppingList);
+            HashMap<String, Object> shoppingListMap = (HashMap<String, Object>)
+                                new ObjectMapper().convertValue(newShoppingList, Map.class);
+
+                        Utils.updateMapForAllWithValue(listId, mEncodedEmail,
+                                updateShoppingListData, "", shoppingListMap);
+
+                        firebaseRef.updateChildren(updateShoppingListData);
+
 
             /* Close the dialog fragment */
             AddListDialogFragment.this.getDialog().cancel();

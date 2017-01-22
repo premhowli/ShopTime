@@ -15,6 +15,7 @@ import com.firebase.client.ServerValue;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 import java.util.HashMap;
 
@@ -70,14 +71,14 @@ public class EditListItemNameDialogFragment extends EditListDialogFragment {
                     Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);
 
                  /* Make a map for the item you are editing the name of */
-                    HashMap<String, Object> updatedItemToAddMap = new HashMap<String, Object>();
+                    HashMap<String, Object> updatedDataItemToEditMap  = new HashMap<String, Object>();
                     /* Add the new name to the update map*/
-                    updatedItemToAddMap.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/"
+                    updatedDataItemToEditMap.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/"
                                     + mListId + "/" + mItemId + "/" + Constants.FIREBASE_PROPERTY_ITEM_NAME,
                             nameInput);
 
 
-                    updatedItemToAddMap.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/"
+                    updatedDataItemToEditMap.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/"
                                     + mListId + "/" + Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
                     /* Make the timestamp for last changed */
                     /*HashMap<String, Object> changedTimestampMap = new HashMap<>();
@@ -90,7 +91,9 @@ public class EditListItemNameDialogFragment extends EditListDialogFragment {
                             "/" + mListId, changedTimestampMap);*/
 
                     /* Do the update */
-                    firebaseRef.updateChildren(updatedItemToAddMap);
+                    Utils.updateMapWithTimestampLastChanged(mListId, mOwner, updatedDataItemToEditMap);
+
+                    firebaseRef.updateChildren(updatedDataItemToEditMap);
 
                 }
     }

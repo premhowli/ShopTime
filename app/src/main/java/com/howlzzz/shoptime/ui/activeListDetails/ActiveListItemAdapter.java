@@ -115,6 +115,7 @@ public class ActiveListItemAdapter extends FirebaseListAdapter<ShoppingListItem>
                         "/" + mListId + "/" + Constants.FIREBASE_PROPERTY_TIMESTAMP_LAST_CHANGED, changedTimestampMap);*/
 
                 /* Do the update */
+        Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedRemoveItemMap);
                 firebaseRef.updateChildren(updatedRemoveItemMap);
         }
 ///debug start

@@ -15,6 +15,7 @@ import com.firebase.client.ServerValue;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 import java.util.HashMap;
 
@@ -67,32 +68,38 @@ public class EditListNameDialogFragment extends EditListDialogFragment {
         /**
          * Set input text to be the current list name if it is not empty
          */
-        if (!inputListName.equals("")) {
+        if (!inputListName.equals("") && mListName != null &&
+                                mListId != null && !inputListName.equals(mListName)) {
 
-            if (mListName != null && mListId != null) {
+            Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);
 
                 /**
                  * If editText input is not equal to the previous name
                  */
-                if (!inputListName.equals(mListName)) {
-                    Firebase shoppingListRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS).child(mListId);
+
+
+
+                    //Firebase shoppingListRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS).child(mListId);
+
+            HashMap<String, Object> updatedListData = new HashMap<String, Object>();
 
                     /* Make a Hashmap for the specific properties you are changing */
-                    HashMap<String, Object> updatedProperties = new HashMap<String, Object>();
-                    updatedProperties.put(Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);
+                    /*HashMap<String, Object> updatedProperties = new HashMap<String, Object>();
+                    updatedProperties.put(Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);*/
+
+            /* Add the value to update at the specified property for all lists */
+                        Utils.updateMapForAllWithValue(mListId, mOwner, updatedListData,
+                                Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);
 
                     /* Add the timestamp for last changed to the updatedProperties Hashmap */
                     //HashMap<String, Object> changedTimestampMap = new HashMap<>();
                     //changedTimestampMap.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
 
                     /* Add the updated timestamp */
-                    updatedProperties.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
-
-                    /* Do the update */
-                    shoppingListRef.updateChildren(updatedProperties);
+            firebaseRef.updateChildren(updatedListData);
                 }
             }
         }
 
-    }
-}
+
+
