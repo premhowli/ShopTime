@@ -108,6 +108,7 @@ public class ShoppingListsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ShopTime selectedList = mActiveListAdapter.getItem(position);
+
                                if (selectedList != null) {
                                     Intent intent = new Intent(getActivity(), ActiveListDetailsActivity.class);
                                    /* Get the list ID using the adapter's get ref method to get the Firebase

@@ -88,7 +88,7 @@ public class Utils {
             timestampNowHash.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
 
             updateMapForAllWithValue(listId, owner, mapToAddDateToUpdate,
-                    Constants.FIREBASE_PROPERTY_TIMESTAMP_LAST_CHANGED, timestampNowHash);
+                    Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
             return mapToAddDateToUpdate;
         }
 

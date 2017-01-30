@@ -5,6 +5,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +54,7 @@ public class AddListDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         mEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
         mEncodedEmail=Utils.encodeEmail(mEmail);
+        Log.e("addlist",mEncodedEmail+"   "+mEmail);
         mDisplayName=getArguments().getString(Constants.KEY_DISPLAY_NAME);
     }
 
@@ -115,7 +117,7 @@ public class AddListDialogFragment extends DialogFragment {
 
 
         String userEnteredName = mEditTextListName.getText().toString();
-        String owner = "Anonymous Owner";
+        //String owner = "Anonymous Owner";
 
         /**
          * If EditText input is not empty
@@ -148,6 +150,7 @@ public class AddListDialogFragment extends DialogFragment {
 
             /* Build the shopping list */
             ShopTime newShoppingList = new ShopTime(userEnteredName, mEncodedEmail,mDisplayName);
+            Log.e("AddListDialogeFragment",mEncodedEmail);
 
             /* Add the shopping list */
             HashMap<String, Object> shoppingListMap = (HashMap<String, Object>)

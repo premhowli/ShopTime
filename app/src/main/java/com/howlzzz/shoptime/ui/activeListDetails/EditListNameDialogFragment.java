@@ -84,11 +84,11 @@ public class EditListNameDialogFragment extends EditListDialogFragment {
             HashMap<String, Object> updatedListData = new HashMap<String, Object>();
 
                     /* Make a Hashmap for the specific properties you are changing */
-                    /*HashMap<String, Object> updatedProperties = new HashMap<String, Object>();
-                    updatedProperties.put(Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);*/
+                    HashMap<String, Object> updatedProperties = new HashMap<String, Object>();
+                    updatedProperties.put(Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);
 
             /* Add the value to update at the specified property for all lists */
-                        Utils.updateMapForAllWithValue(mListId, mOwner, updatedListData,
+                        Utils.updateMapForAllWithValue(mListId, mEncodedEmail, updatedListData,
                                 Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);
 
                     /* Add the timestamp for last changed to the updatedProperties Hashmap */

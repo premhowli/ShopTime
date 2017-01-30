@@ -30,6 +30,7 @@ public class RemoveListDialogFragment extends DialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     final static String LOG_TAG = RemoveListDialogFragment.class.getSimpleName();
+    private String mListEmail;
 
     /**
      * Public static constructor that creates fragment and passes a bundle with data into it when adapter is created
@@ -38,7 +39,7 @@ public class RemoveListDialogFragment extends DialogFragment {
         RemoveListDialogFragment removeListDialogFragment = new RemoveListDialogFragment();
         Bundle bundle = new Bundle();
         bundle.putString(Constants.KEY_LIST_ID, listId);
-        bundle.putString(Constants.KEY_LIST_OWNER, shoppingList.getOwner());
+        bundle.putString(Constants.KEY_LIST_OWNER, shoppingList.getEmail());
         removeListDialogFragment.setArguments(bundle);
         return removeListDialogFragment;
     }
@@ -51,6 +52,9 @@ public class RemoveListDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         mListId = getArguments().getString(Constants.KEY_LIST_ID);
         mListOwner = getArguments().getString(Constants.KEY_LIST_OWNER);
+        Log.e(LOG_TAG,mListOwner);
+        //mListOwner=Utils.encodeEmail(mListEmail);
+        
     }
 
     @Override
@@ -91,11 +95,12 @@ public class RemoveListDialogFragment extends DialogFragment {
 
         /*removeListData.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/"+ mListId, null);
         removeListData.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/"+ mListId, null);*/
-        Utils.updateMapForAllWithValue(mListId, mListOwner, removeListData, "", null);
+
 
         /*Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);*/
 
         removeListData.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/" + mListId, null);
+        Utils.updateMapForAllWithValue(mListId, mListOwner, removeListData, "", null);
 
 
         /* Do a deep-path update */

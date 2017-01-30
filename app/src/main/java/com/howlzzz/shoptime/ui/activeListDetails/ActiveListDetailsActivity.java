@@ -486,7 +486,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void showAddListItemDialog(View view) {
         /* Create an instance of the dialog fragment and show it */
         FragmentManager fm=getSupportFragmentManager();
-        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEmail,mDisplayName);
+        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEmailEncoded,mDisplayName);
         dia.show(fm,"AddListItemDialogShow");
 
         /*android.support.v4.app.DialogFragment dialog = AddListItemDialogFragment.newInstance(mShoppingList);

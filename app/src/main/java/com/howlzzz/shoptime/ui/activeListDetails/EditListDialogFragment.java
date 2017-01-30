@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,6 +43,7 @@ public abstract class EditListDialogFragment extends DialogFragment {
         bundle.putString(Constants.KEY_LIST_ID,listId);
         bundle.putInt(Constants.KEY_LAYOUT_RESOURCE, resource);
         bundle.putString(Constants.KEY_LIST_OWNER, shoppingList.getOwner());
+        Log.e("Edit",encodedEmail);
         bundle.putString(Constants.KEY_ENCODED_EMAIL, encodedEmail);
         bundle.putString(Constants.KEY_DISPLAY_NAME,displayName);
         return bundle;
@@ -57,6 +59,7 @@ public abstract class EditListDialogFragment extends DialogFragment {
         mResource = getArguments().getInt(Constants.KEY_LAYOUT_RESOURCE);
         mOwner = getArguments().getString(Constants.KEY_LIST_OWNER);
         mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
+        Log.e("Efdit 2",mEncodedEmail);
         mDisplayName=getArguments().getString(Constants.KEY_DISPLAY_NAME);
     }
 

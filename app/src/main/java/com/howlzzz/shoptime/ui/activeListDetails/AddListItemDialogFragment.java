@@ -7,6 +7,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ public class AddListItemDialogFragment extends EditListDialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.e("Add  ",mEncodedEmail);
     }
 
     @Override
@@ -94,7 +96,7 @@ public class AddListItemDialogFragment extends EditListDialogFragment {
             //updatedItemToAddMap.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/" + mListId + "/" + Constants.FIREBASE_PROPERTY_TIMESTAMP_LAST_CHANGED, changedTimestampMap);
 
             /* Do the update */
-            Utils.updateMapWithTimestampLastChanged(mListId, mOwner, updatedItemToAddMap);
+            Utils.updateMapWithTimestampLastChanged(mListId, mEncodedEmail, updatedItemToAddMap);
             firebaseRef.updateChildren(updatedItemToAddMap);
 
             /**
