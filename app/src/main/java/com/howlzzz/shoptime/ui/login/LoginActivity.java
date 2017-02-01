@@ -1,16 +1,12 @@
 package com.howlzzz.shoptime.ui.login;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-
-import android.app.ProgressDialog;
-import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -26,19 +22,13 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -53,8 +43,6 @@ import com.howlzzz.shoptime.ui.MainActivity;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 
-import java.io.IOException;
-
 /**
  * Represents Sign in screen and functionality of the app
  */
@@ -63,19 +51,18 @@ public class LoginActivity extends BaseActivity implements
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String LOG_TAG = LoginActivity.class.getSimpleName();
+    private static final int RC_SIGN_IN = 9001;
+    SharedPreferences.Editor editor;
+    /* A Google account object that is populated if the user signs in with Google */
+    GoogleSignInAccount mGoogleAccount;
     /* A dialog that is presented until the Firebase authentication finished. */
     private ProgressDialog mAuthProgressDialog;
     private EditText mEditTextEmailInput, mEditTextPasswordInput;
     private SharedPreferences mSharedPref;
-    SharedPreferences.Editor editor;
     private String PREFS_KEY="email";
     private String mUserName, mUserEmail;
     private Firebase.AuthStateListener mAuthStateListener;
-
-
-
-
-
+    /* Request code used to invoke sign in user interactions for Google+ */
     private FirebaseAuth mAuth;
     /**
      * Variables related to Google Login
@@ -83,11 +70,6 @@ public class LoginActivity extends BaseActivity implements
 
     /* A flag indicating that a PendingIntent is in progress and prevents us from starting further intents. */
     private boolean mGoogleIntentInProgress;
-    /* Request code used to invoke sign in user interactions for Google+ */
-
-    private static final int RC_SIGN_IN = 9001;
-    /* A Google account object that is populated if the user signs in with Google */
-    GoogleSignInAccount mGoogleAccount;
     private Firebase mFirebaseRef;
     private SharedPreferences sp;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -425,7 +407,8 @@ public class LoginActivity extends BaseActivity implements
 
                             //creating user data
                             //String encodeEmail=Utils.encodeEmail(acct.getEmail().toString());
-                            mUserEmail=acct.getEmail().toString();
+                            String s = acct.getEmail().toString();
+                            mUserEmail = Utils.encodeEmail(s);
                             mUserName=acct.getGivenName().toString();
                             createUserInFirebaseHelper(encodeEmail,mUserName,mUserEmail);
                         }

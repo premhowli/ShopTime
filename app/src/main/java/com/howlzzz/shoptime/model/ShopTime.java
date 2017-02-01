@@ -45,6 +45,12 @@ public class ShopTime {
             return null;
         }
     }
+
+    public void setTimestampLastChangedToNow() {
+
+        this.created = ServerValue.TIMESTAMP;
+    }
+
     @Override
     public String toString() {
         return listName + " by " + owner;

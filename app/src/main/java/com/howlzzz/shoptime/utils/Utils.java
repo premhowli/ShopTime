@@ -1,8 +1,6 @@
 package com.howlzzz.shoptime.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import com.firebase.client.ServerValue;
 import com.howlzzz.shoptime.model.ShopTime;
@@ -38,6 +36,15 @@ public class Utils {
         return userEmail.replace(".", ",");
     }
 
+    /**
+     * +     * Email is being decoded just once to display real email in AutocompleteFriendAdapter
+     * +     *
+     * +     * @see com.udacity.firebase.shoppinglistplusplus.ui.sharing.AutocompleteFriendAdapter
+     * +
+     */
+    public static String decodeEmail(String userEmail) {
+        return userEmail.replace(",", ".");
+    }
 
 
         /**

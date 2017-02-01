@@ -2,11 +2,7 @@ package com.howlzzz.shoptime.ui.activeListDetails;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
@@ -18,14 +14,11 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.firebase.client.AuthData;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.howlzzz.shoptime.R;
@@ -33,7 +26,7 @@ import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.model.ShoppingListItem;
 import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.ui.BaseActivity;
-import com.howlzzz.shoptime.ui.MainActivity;
+import com.howlzzz.shoptime.ui.sharing.ShareListActivity;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 import com.shaded.fasterxml.jackson.databind.ObjectMapper;
@@ -304,7 +297,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         /* Only the edit and remove options are implemented */
         remove.setVisible(mCurrentUserIsOwner);
         edit.setVisible(mCurrentUserIsOwner);
-        share.setVisible(false);
+        share.setVisible(mCurrentUserIsOwner);
         archive.setVisible(false);
 
         return true;
@@ -334,6 +327,9 @@ public class ActiveListDetailsActivity extends BaseActivity {
          * Eventually we'll add this
          */
         if (id == R.id.action_share_list) {
+            Intent intent = new Intent(ActiveListDetailsActivity.this, ShareListActivity.class);
+            intent.putExtra(Constants.KEY_LIST_ID, mListId);
+            startActivity(intent);
             return true;
         }
 
