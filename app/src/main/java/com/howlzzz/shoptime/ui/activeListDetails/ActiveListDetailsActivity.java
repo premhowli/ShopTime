@@ -536,10 +536,13 @@ public class ActiveListDetailsActivity extends BaseActivity {
                 /*Firebase usersShoppingRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS)
                         .child(mListId).child(Constants.FIREBASE_PROPERTY_USERS_SHOPPING)
                         .child(mEmailEncoded);*/
-
+        Log.e(LOG_TAG, "shooping toggle   " + mEmailEncoded + "   ");
 
         HashMap<String, Object> updatedUserData = new HashMap<String, Object>();
-           String propertyToUpdate = Constants.FIREBASE_PROPERTY_USERS_SHOPPING + "/" + mEncodedEmail;
+        String s = Utils.encodeEmail(mEncodedEmail);
+        String propertyToUpdate = Constants.FIREBASE_PROPERTY_USERS_SHOPPING + "/" + s;
+
+        Log.e(LOG_TAG, propertyToUpdate + mShopping + mShoppingList.getEmail());
 
                 /* Either add or remove the current user from the usersShopping map */
                 if (mShopping) {
@@ -548,7 +551,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
                                Utils.updateMapForAllWithValue(mListId, mShoppingList.getOwner(), updatedUserData,
                                        propertyToUpdate, null);
                                /* Appends the timestamp changes for all lists */
-                               Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedUserData);
+                    //Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedUserData);
 
 
                                /* Do a deep-path update */
@@ -561,9 +564,9 @@ public class ActiveListDetailsActivity extends BaseActivity {
                                         new ObjectMapper().convertValue(mCurrentUser, Map.class);
 
                                 /* Add the value to update at the specified property for all lists */
-                                Utils.updateMapForAllWithValue(mListId, mShoppingList.getOwner(), updatedUserData, propertyToUpdate, currentUser);
+                    Utils.updateMapForAllWithValue(mListId, mShoppingList.getEmail(), updatedUserData, propertyToUpdate, currentUser);
                                 /* Appends the timestamp changes for all lists */
-                               Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedUserData);
+                    //Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getEmail(), updatedUserData);
 
                                 /* Do a deep-path update */
                                 mFirebaseRef.updateChildren(updatedUserData);
