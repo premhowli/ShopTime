@@ -159,15 +159,46 @@ public class FriendAdapter extends FirebaseListAdapter<User> {
         HashMap<String, Object> updatedUserData = new HashMap<String, Object>();
 
                 /* Update the sharedWith List for this Shopping List */
+        HashMap<String, User> newSharedWith = new HashMap<String, User>(mSharedUsersList);
+
         if (addFriend) {
+
+            /**
+             +             * Changes the timestamp changed to now; Because of ancestry issues, we cannot
+             +             * have one updateChildren call that both creates data and then updates that same data
+             +             * because updateChildren has no way of knowing what was the intended update
+             +             */
+            mShoppingList.setTimestampLastChangedToNow();
+                        /* Make it a HashMap of the shopping list and user */
+            final HashMap<String, Object> shoppingListForFirebase = (HashMap<String, Object>)
+                    new ObjectMapper().convertValue(mShoppingList, Map.class);
+
             final HashMap<String, Object> friendForFirebase = (HashMap<String, Object>)
                     new ObjectMapper().convertValue(friendToAddOrRemove, Map.class);
-            updatedUserData.put(Constants.FIREBASE_LOCATION_LISTS_SHARED_WITH + "/" + mListId + "/" + friendToAddOrRemove.getEmail(), friendForFirebase);
+            //updatedUserData.put(Constants.FIREBASE_LOCATION_LISTS_SHARED_WITH + "/" + mListId + "/" + friendToAddOrRemove.getEmail(), friendForFirebase);
+
+            /* Add the friend to the shared list */
+            updatedUserData.put("/" + Constants.FIREBASE_LOCATION_LISTS_SHARED_WITH + "/" + mListId +
+                    "/" + friendToAddOrRemove.getEmail(), friendForFirebase);
+
+                        /* Add that shopping list hashmap to the new user's active lists */
+            updatedUserData.put("/" + Constants.FIREBASE_LOCATION_USER_LISTS + "/" + friendToAddOrRemove.getEmail()
+                    + "/" + mListId, shoppingListForFirebase);
         } else {
-            updatedUserData.put(Constants.FIREBASE_LOCATION_LISTS_SHARED_WITH + "/" + mListId + "/" + friendToAddOrRemove.getEmail(), null);
+
+            /* Remove the friend from the shared list */
+            updatedUserData.put("/" + Constants.FIREBASE_LOCATION_LISTS_SHARED_WITH + "/" + mListId +
+                    "/" + friendToAddOrRemove.getEmail(), null);
+
+                        /* Remove the list from the shared friend */
+            updatedUserData.put("/" + Constants.FIREBASE_LOCATION_USER_LISTS + "/" + friendToAddOrRemove.getEmail()
+                    + "/" + mListId, null);
+
+            newSharedWith.remove(friendToAddOrRemove.getEmail());
+            //updatedUserData.put(Constants.FIREBASE_LOCATION_LISTS_SHARED_WITH + "/" + mListId + "/" + friendToAddOrRemove.getEmail(), null);
         }
 
-        Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedUserData);
+        Utils.updateMapWithTimestampLastChanged(newSharedWith, mListId, mShoppingList.getOwner(), updatedUserData);
 
         return updatedUserData;
     }

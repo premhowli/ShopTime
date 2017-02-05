@@ -2,22 +2,15 @@ package com.howlzzz.shoptime.ui.activeListDetails;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentManager;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.howlzzz.shoptime.R;
-import com.howlzzz.shoptime.ShopTime;
+import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 
@@ -25,21 +18,23 @@ import java.util.HashMap;
 
 
 public class RemoveListDialogFragment extends DialogFragment {
-    String mListId;
-    String mListOwner;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     final static String LOG_TAG = RemoveListDialogFragment.class.getSimpleName();
+    String mListId;
+    String mListOwner;
+    HashMap mSharedWith;
     private String mListEmail;
 
     /**
      * Public static constructor that creates fragment and passes a bundle with data into it when adapter is created
      */
-    public static RemoveListDialogFragment newInstance(com.howlzzz.shoptime.model.ShopTime shoppingList,String listId) {
+    public static RemoveListDialogFragment newInstance(com.howlzzz.shoptime.model.ShopTime shoppingList, String listId, HashMap<String, User> sharedWithUsers) {
         RemoveListDialogFragment removeListDialogFragment = new RemoveListDialogFragment();
         Bundle bundle = new Bundle();
         bundle.putString(Constants.KEY_LIST_ID, listId);
         bundle.putString(Constants.KEY_LIST_OWNER, shoppingList.getEmail());
+        bundle.putSerializable(Constants.KEY_SHARED_WITH_USERS, sharedWithUsers);
         removeListDialogFragment.setArguments(bundle);
         return removeListDialogFragment;
     }
@@ -52,6 +47,7 @@ public class RemoveListDialogFragment extends DialogFragment {
         super.onCreate(savedInstanceState);
         mListId = getArguments().getString(Constants.KEY_LIST_ID);
         mListOwner = getArguments().getString(Constants.KEY_LIST_OWNER);
+        mSharedWith = (HashMap) getArguments().getSerializable(Constants.KEY_SHARED_WITH_USERS);
         Log.e(LOG_TAG,mListOwner);
         //mListOwner=Utils.encodeEmail(mListEmail);
         
@@ -100,7 +96,7 @@ public class RemoveListDialogFragment extends DialogFragment {
         /*Firebase firebaseRef = new Firebase(Constants.FIREBASE_URL);*/
 
         removeListData.put("/" + Constants.FIREBASE_LOCATION_SHOPPING_LIST_ITEMS + "/" + mListId, null);
-        Utils.updateMapForAllWithValue(mListId, mListOwner, removeListData, "", null);
+        Utils.updateMapForAllWithValue(mSharedWith, mListId, mListOwner, removeListData, "", null);
 
 
         /* Do a deep-path update */
