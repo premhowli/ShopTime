@@ -3,7 +3,7 @@ package com.howlzzz.shoptime.ui.activeListDetails;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -57,6 +57,9 @@ public class ActiveListDetailsActivity extends BaseActivity {
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+    private Firebase mSharedWithRef;
+    private ValueEventListener mSharedWithListener;
+    private HashMap<String, User> mSharedWithUsers;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -82,6 +85,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         mFirebaseRef=new Firebase(Constants.FIREBASE_URL);
         mCurrentListRef=new Firebase(Constants.FIREBASE_URL_USER_LISTS).child(mEmailEncoded).child(mListId);
         mCurrentUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(Utils.encodeEmail(mEmailEncoded));
+        mSharedWithRef = new Firebase(Constants.FIREBASE_URL_LISTS_SHARED_WITH).child(mListId);
         Firebase listItemsRef = new Firebase(Constants.FIREBASE_URL_SHOPPING_LIST_ITEMS).child(mListId);
         /**
          * Link layout elements from XML and setup the toolbar
@@ -90,6 +94,24 @@ public class ActiveListDetailsActivity extends BaseActivity {
         initializeScreen();
         /* Calling invalidateOptionsMenu causes onCreateOptionsMenu to be called */
 
+        mSharedWithListener = mSharedWithRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mSharedWithUsers = new HashMap<String, User>();
+                for (DataSnapshot currentUser : dataSnapshot.getChildren()) {
+                    mSharedWithUsers.put(currentUser.getKey(), currentUser.getValue(User.class));
+                }
+                mActiveListItemAdapter.setSharedWithUsers(mSharedWithUsers);
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+                Log.e(LOG_TAG,
+                        getString(R.string.log_error_the_read_failed) +
+                                firebaseError.getMessage());
+            }
+        });
+        
         mCurrentUserRefListener = mCurrentUserRef.addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
@@ -355,6 +377,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
         //mActiveListRef.removeEventListener(mActiveListRefListener);
         mCurrentListRef.removeEventListener(mCurrentListRefListener);
         mCurrentUserRef.removeEventListener(mCurrentUserRefListener);
+        mSharedWithRef.removeEventListener(mSharedWithListener);
     }
 
     /**
@@ -468,9 +491,11 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void removeList() {
 
 
-        FragmentManager fm=getSupportFragmentManager();
-        RemoveListDialogFragment dia=RemoveListDialogFragment.newInstance(mShoppingList,mListId);
-        dia.show(fm,"removelistShow");
+        //RemoveListDialogFragment dia=RemoveListDialogFragment.newInstance(mShoppingList,mListId);
+        DialogFragment dialog = RemoveListDialogFragment.newInstance(mShoppingList, mListId, mSharedWithUsers);
+
+
+        dialog.show(getSupportFragmentManager(), "removelistShow");
         /* Create an instance of the dialog fragment and show it */
         /*RemoveListDialogFragment dialog = RemoveListDialogFragment.newInstance(mShoppingList);
         dialog.show(getFragmentManager(), "RemoveListDialogFragment");*/
@@ -481,9 +506,10 @@ public class ActiveListDetailsActivity extends BaseActivity {
      */
     public void showAddListItemDialog(View view) {
         /* Create an instance of the dialog fragment and show it */
-        FragmentManager fm=getSupportFragmentManager();
-        AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEmailEncoded,mDisplayName);
-        dia.show(fm,"AddListItemDialogShow");
+
+        //AddListItemDialogFragment dia=AddListItemDialogFragment.newInstance(mShoppingList,mListId, mEmailEncoded,mDisplayName);
+        DialogFragment dialog = AddListItemDialogFragment.newInstance(mShoppingList, mListId, mEncodedEmail, mDisplayName, mSharedWithUsers);
+        dialog.show(getSupportFragmentManager(), "AddListItemDialogShow");
 
         /*android.support.v4.app.DialogFragment dialog = AddListItemDialogFragment.newInstance(mShoppingList);
         dialog.show(getFragmentManager(),"");*/
@@ -495,9 +521,10 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void showEditListNameDialog() {
         /* Create an instance of the dialog fragment and show it */
 
-        FragmentManager fm=getSupportFragmentManager();
-        EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId, mEmail,mDisplayName);
-        dia.show(fm,"EditListNameDialogShow");
+
+        //EditListNameDialogFragment dia=EditListNameDialogFragment.newInstance(mShoppingList,mListId, mEmail,mDisplayName);
+        DialogFragment dialog = EditListNameDialogFragment.newInstance(mShoppingList, mListId, mEncodedEmail, mDisplayName, mSharedWithUsers);
+        dialog.show(getSupportFragmentManager(), "EditListNameDialogShow");
 
 
 
@@ -517,9 +544,8 @@ public class ActiveListDetailsActivity extends BaseActivity {
     public void showEditListItemNameDialog(String itemName, String itemId) {
 
 
-        FragmentManager fm=getSupportFragmentManager();
-        EditListDialogFragment dia=EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId, mEmail,mDisplayName);
-        dia.show(fm,"EditListItemNameShow");
+        EditListDialogFragment dia = EditListItemNameDialogFragment.newInstance(mShoppingList, itemName, itemId, mListId, mEmail, mDisplayName, mSharedWithUsers);
+        dia.show(getSupportFragmentManager(), "EditListItemNameShow");
 
         /* Create an instance of the dialog fragment and show it */
         /*EditListItemNameDialogFragment dialog = EditListItemNameDialogFragment.newInstance(mShoppingList);
@@ -548,7 +574,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
                 if (mShopping) {
 
                                /* Add the value to update at the specified property for all lists */
-                               Utils.updateMapForAllWithValue(mListId, mShoppingList.getOwner(), updatedUserData,
+                    Utils.updateMapForAllWithValue(mSharedWithUsers, mListId, mShoppingList.getEmail(), updatedUserData,
                                        propertyToUpdate, null);
                                /* Appends the timestamp changes for all lists */
                     //Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedUserData);
@@ -564,7 +590,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
                                         new ObjectMapper().convertValue(mCurrentUser, Map.class);
 
                                 /* Add the value to update at the specified property for all lists */
-                    Utils.updateMapForAllWithValue(mListId, mShoppingList.getEmail(), updatedUserData, propertyToUpdate, currentUser);
+                    Utils.updateMapForAllWithValue(mSharedWithUsers, mListId, mShoppingList.getEmail(), updatedUserData, propertyToUpdate, currentUser);
                                 /* Appends the timestamp changes for all lists */
                     //Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getEmail(), updatedUserData);
 

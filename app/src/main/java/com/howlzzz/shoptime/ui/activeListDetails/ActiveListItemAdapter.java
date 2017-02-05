@@ -31,6 +31,7 @@ public class ActiveListItemAdapter extends FirebaseListAdapter<ShoppingListItem>
 
     private ShopTime mShoppingList;
     private String mListId,mEncodedEmail;
+    private HashMap<String, User> mSharedWithUsers;
 
     public ActiveListItemAdapter(Activity activity, Class<ShoppingListItem> modelClass, int modelLayout, Query ref, String listId,String encodedEmail) {
         super(activity, modelClass, modelLayout, ref);
@@ -45,6 +46,11 @@ public class ActiveListItemAdapter extends FirebaseListAdapter<ShoppingListItem>
                 this.notifyDataSetChanged();
             }
 
+
+    public void setSharedWithUsers(HashMap<String, User> sharedWithUsers) {
+        this.mSharedWithUsers = sharedWithUsers;
+        this.notifyDataSetChanged();
+    }
     @Override
     protected void populateView(View view, ShoppingListItem shoppingListItem, int position) {
 
@@ -115,7 +121,7 @@ public class ActiveListItemAdapter extends FirebaseListAdapter<ShoppingListItem>
                         "/" + mListId + "/" + Constants.FIREBASE_PROPERTY_TIMESTAMP_LAST_CHANGED, changedTimestampMap);*/
 
                 /* Do the update */
-        Utils.updateMapWithTimestampLastChanged(mListId, mShoppingList.getOwner(), updatedRemoveItemMap);
+        Utils.updateMapWithTimestampLastChanged(mSharedWithUsers, mListId, mShoppingList.getOwner(), updatedRemoveItemMap);
                 firebaseRef.updateChildren(updatedRemoveItemMap);
         }
 ///debug start

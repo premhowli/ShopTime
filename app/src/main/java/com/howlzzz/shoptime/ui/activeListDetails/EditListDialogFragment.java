@@ -2,18 +2,13 @@ package com.howlzzz.shoptime.ui.activeListDetails;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentManager;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
@@ -21,13 +16,17 @@ import android.widget.TextView;
 
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
+import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.utils.Constants;
+
+import java.util.HashMap;
 
 
 public abstract class EditListDialogFragment extends DialogFragment {
     EditText mEditTextForList;
     int mResource;
     String mListId, mOwner, mEncodedEmail,mDisplayName;
+    HashMap mSharedWith;
 
 
     /**
@@ -38,8 +37,9 @@ public abstract class EditListDialogFragment extends DialogFragment {
      * @param resource
      * @return
      */
-    protected static Bundle newInstanceHelper(ShopTime shoppingList, int resource,String listId,String encodedEmail,String displayName) {
+    protected static Bundle newInstanceHelper(ShopTime shoppingList, int resource, String listId, String encodedEmail, String displayName, HashMap<String, User> sharedWithUsers) {
         Bundle bundle = new Bundle();
+        bundle.putSerializable(Constants.KEY_SHARED_WITH_USERS, sharedWithUsers);
         bundle.putString(Constants.KEY_LIST_ID,listId);
         bundle.putInt(Constants.KEY_LAYOUT_RESOURCE, resource);
         bundle.putString(Constants.KEY_LIST_OWNER, shoppingList.getOwner());
@@ -58,6 +58,7 @@ public abstract class EditListDialogFragment extends DialogFragment {
         mListId=getArguments().getString(Constants.KEY_LIST_ID);
         mResource = getArguments().getInt(Constants.KEY_LAYOUT_RESOURCE);
         mOwner = getArguments().getString(Constants.KEY_LIST_OWNER);
+        mSharedWith = (HashMap) getArguments().getSerializable(Constants.KEY_SHARED_WITH_USERS);
         mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
         Log.e("Efdit 2",mEncodedEmail);
         mDisplayName=getArguments().getString(Constants.KEY_DISPLAY_NAME);

@@ -1,19 +1,12 @@
 package com.howlzzz.shoptime.ui.activeListDetails;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.firebase.client.Firebase;
-import com.firebase.client.ServerValue;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
+import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 
@@ -29,9 +22,9 @@ public class EditListNameDialogFragment extends EditListDialogFragment {
     /**
      * Public static constructor that creates fragment and passes a bundle with data into it when adapter is created
      */
-    public static EditListNameDialogFragment newInstance(ShopTime shoppingList,String listId,String encodedEmail,String displayName) {
+    public static EditListNameDialogFragment newInstance(ShopTime shoppingList, String listId, String encodedEmail, String displayName, HashMap<String, User> sharedWithUsers) {
         EditListNameDialogFragment editListNameDialogFragment = new EditListNameDialogFragment();
-        Bundle bundle = EditListDialogFragment.newInstanceHelper(shoppingList, R.layout.dialog_edit_list,listId,encodedEmail,displayName);
+        Bundle bundle = EditListDialogFragment.newInstanceHelper(shoppingList, R.layout.dialog_edit_list, listId, encodedEmail, displayName, sharedWithUsers);
         bundle.putString(Constants.KEY_LIST_NAME, shoppingList.getListName());
         editListNameDialogFragment.setArguments(bundle);
         return editListNameDialogFragment;
@@ -88,7 +81,7 @@ public class EditListNameDialogFragment extends EditListDialogFragment {
                     updatedProperties.put(Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);
 
             /* Add the value to update at the specified property for all lists */
-                        Utils.updateMapForAllWithValue(mListId, mEncodedEmail, updatedListData,
+            Utils.updateMapForAllWithValue(mSharedWith, mListId, mEncodedEmail, updatedListData,
                                 Constants.FIREBASE_PROPERTY_LIST_NAME, inputListName);
 
                     /* Add the timestamp for last changed to the updatedProperties Hashmap */

@@ -1,22 +1,14 @@
 package com.howlzzz.shoptime.ui.activeListDetails;
 
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.firebase.client.Firebase;
-import com.firebase.client.ServerValue;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.model.ShoppingListItem;
+import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 import com.shaded.fasterxml.jackson.databind.ObjectMapper;
@@ -28,10 +20,10 @@ import java.util.Map;
 public class AddListItemDialogFragment extends EditListDialogFragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    public static AddListItemDialogFragment newInstance(ShopTime shoppingList,String listId,String encodedEmail,String displayName) {
+    public static AddListItemDialogFragment newInstance(ShopTime shoppingList, String listId, String encodedEmail, String displayName, HashMap<String, User> sharedWithUsers) {
         AddListItemDialogFragment addListItemDialogFragment = new AddListItemDialogFragment();
 
-        Bundle bundle = newInstanceHelper(shoppingList, R.layout.dialog_add_item,listId,encodedEmail,displayName);
+        Bundle bundle = newInstanceHelper(shoppingList, R.layout.dialog_add_item, listId, encodedEmail, displayName, sharedWithUsers);
         addListItemDialogFragment.setArguments(bundle);
 
         return addListItemDialogFragment;
@@ -96,7 +88,7 @@ public class AddListItemDialogFragment extends EditListDialogFragment {
             //updatedItemToAddMap.put("/" + Constants.FIREBASE_LOCATION_ACTIVE_LISTS + "/" + mListId + "/" + Constants.FIREBASE_PROPERTY_TIMESTAMP_LAST_CHANGED, changedTimestampMap);
 
             /* Do the update */
-            Utils.updateMapWithTimestampLastChanged(mListId, mEncodedEmail, updatedItemToAddMap);
+            Utils.updateMapWithTimestampLastChanged(mSharedWith, mListId, mEncodedEmail, updatedItemToAddMap);
             firebaseRef.updateChildren(updatedItemToAddMap);
 
             /**

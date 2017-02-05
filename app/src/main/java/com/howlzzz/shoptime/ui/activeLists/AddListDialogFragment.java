@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.firebase.client.Firebase;
-import com.firebase.client.ServerValue;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.utils.Constants;
@@ -156,7 +155,7 @@ public class AddListDialogFragment extends DialogFragment {
             HashMap<String, Object> shoppingListMap = (HashMap<String, Object>)
                                 new ObjectMapper().convertValue(newShoppingList, Map.class);
 
-                        Utils.updateMapForAllWithValue(listId, mEncodedEmail,
+            Utils.updateMapForAllWithValue(null, listId, mEncodedEmail,
                                 updateShoppingListData, "", shoppingListMap);
 
                         firebaseRef.updateChildren(updateShoppingListData);
