@@ -32,6 +32,7 @@ public class FriendAdapter extends FirebaseListAdapter<User> {
     private HashMap <Firebase, ValueEventListener> mLocationListenerMap;
     private ShopTime mShoppingList;
     private HashMap<String, User> mSharedUsersList;
+    private String s;
 
 
 
