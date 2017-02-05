@@ -18,6 +18,7 @@ import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.ShopTime;
 import com.howlzzz.shoptime.model.User;
 import com.howlzzz.shoptime.utils.Constants;
+import com.howlzzz.shoptime.utils.Utils;
 
 import java.util.HashMap;
 
@@ -59,7 +60,7 @@ public abstract class EditListDialogFragment extends DialogFragment {
         mResource = getArguments().getInt(Constants.KEY_LAYOUT_RESOURCE);
         mOwner = getArguments().getString(Constants.KEY_LIST_OWNER);
         mSharedWith = (HashMap) getArguments().getSerializable(Constants.KEY_SHARED_WITH_USERS);
-        mEncodedEmail = getArguments().getString(Constants.KEY_ENCODED_EMAIL);
+        mEncodedEmail = Utils.encodeEmail(getArguments().getString(Constants.KEY_ENCODED_EMAIL));
         Log.e("Efdit 2",mEncodedEmail);
         mDisplayName=getArguments().getString(Constants.KEY_DISPLAY_NAME);
     }

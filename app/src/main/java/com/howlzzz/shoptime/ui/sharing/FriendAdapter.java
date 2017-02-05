@@ -34,6 +34,7 @@ public class FriendAdapter extends FirebaseListAdapter<User> {
     private HashMap<String, User> mSharedUsersList;
 
 
+
     /**
      * Public constructor that initializes private instance variables when adapter is created
      */
@@ -43,6 +44,7 @@ public class FriendAdapter extends FirebaseListAdapter<User> {
         this.mActivity = activity;
         this.mListId = listId;
         mFirebaseRef = new Firebase(Constants.FIREBASE_URL);
+        mLocationListenerMap = new HashMap<Firebase, ValueEventListener>();
     }
 
     /**
@@ -126,6 +128,8 @@ public class FriendAdapter extends FirebaseListAdapter<User> {
                                 firebaseError.getMessage());
             }
         });
+        /* Add the listener to the HashMap so that it can be removed on cleanup */
+        mLocationListenerMap.put(sharedFriendInShoppingListRef, listener);
 
     }
 
@@ -206,6 +210,10 @@ public class FriendAdapter extends FirebaseListAdapter<User> {
     @Override
     public void cleanup() {
         super.cleanup();
+          /* Clean up the event listeners */
+        for (HashMap.Entry<Firebase, ValueEventListener> listenerToClean : mLocationListenerMap.entrySet()) {
+            listenerToClean.getKey().removeEventListener(listenerToClean.getValue());
+        }
     }
 
     
