@@ -18,6 +18,7 @@ import java.util.Map;
 
 
 public class AddListItemDialogFragment extends EditListDialogFragment {
+    //private String encodedEmail;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     public static AddListItemDialogFragment newInstance(ShopTime shoppingList, String listId, String encodedEmail, String displayName, HashMap<String, User> sharedWithUsers) {
@@ -36,6 +37,7 @@ public class AddListItemDialogFragment extends EditListDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.e("Add  ",mEncodedEmail);
+        // encodedEmail=Utils.encodeEmail(mEncodedEmail);
     }
 
     @Override
