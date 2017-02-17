@@ -13,12 +13,14 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.firebase.FirebaseApp;
 import com.howlzzz.shoptime.R;
 import com.howlzzz.shoptime.model.User;
@@ -35,14 +37,20 @@ import com.howlzzz.shoptime.utils.Utils;
  * has a {@link ViewPager} with {@link ShoppingListsFragment} and {@link MealsFragment}
  */
 public class MainActivity extends BaseActivity {
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private Firebase mUserRef;
     private ValueEventListener mUserRefListener;
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MobileAds.initialize(getApplicationContext(), "ca-app-pub-9614860961034974~7064109841");
+
+        AdView mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         FirebaseApp.initializeApp(this);
         Firebase.setAndroidContext(getApplicationContext());

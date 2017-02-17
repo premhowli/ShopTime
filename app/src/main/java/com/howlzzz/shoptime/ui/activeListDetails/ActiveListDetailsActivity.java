@@ -83,6 +83,7 @@ public class ActiveListDetailsActivity extends BaseActivity {
 
         //mActiveListRef = new Firebase(Constants.FIREBASE_URL_ACTIVE_LISTS).child(mListId);
         mFirebaseRef=new Firebase(Constants.FIREBASE_URL);
+        mFirebaseRef.keepSynced(true);
         mCurrentListRef=new Firebase(Constants.FIREBASE_URL_USER_LISTS).child(mEmailEncoded).child(mListId);
         mCurrentUserRef = new Firebase(Constants.FIREBASE_URL_USERS).child(Utils.encodeEmail(mEmailEncoded));
         mSharedWithRef = new Firebase(Constants.FIREBASE_URL_LISTS_SHARED_WITH).child(mListId);

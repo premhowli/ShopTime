@@ -42,6 +42,10 @@ import com.howlzzz.shoptime.ui.BaseActivity;
 import com.howlzzz.shoptime.ui.MainActivity;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
+import com.shaded.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Represents Sign in screen and functionality of the app
@@ -73,6 +77,8 @@ public class LoginActivity extends BaseActivity implements
     private Firebase mFirebaseRef;
     private SharedPreferences sp;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private SharedPreferences.Editor mSharedPrefEditor;
+    private String uId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -291,7 +297,67 @@ public class LoginActivity extends BaseActivity implements
      * logs in with Firebase's Google login provider.
      * @param authData AuthData object returned from onAuthenticated
      */
-    private void setAuthenticatedUserGoogle(AuthData authData){
+    private void setAuthenticatedUserGoogle(final GoogleSignInAccount authData) {
+
+
+        String unprocessedEmail;
+        if (mGoogleApiClient.isConnected()) {
+            unprocessedEmail = authData.getEmail().toLowerCase();
+            mSharedPrefEditor.putString(Constants.KEY_GOOGLE_EMAIL, unprocessedEmail).apply();
+        } else {
+
+            /**
+             * Otherwise get email from sharedPreferences, use null as default value
+             * (this mean that user resumes his session)
+             */
+            unprocessedEmail = mSharedPref.getString(Constants.KEY_GOOGLE_EMAIL, null);
+        }
+
+        /**
+         * Encode user email replacing "." with "," to be able to use it
+         * as a Firebase db key
+         */
+        mEncodedEmail = Utils.encodeEmail(unprocessedEmail);
+
+         /* Get username from authData */
+        final String userName = (String) authData.getDisplayName();
+
+         /* If no user exists, make a user */
+        final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(mEncodedEmail);
+        userLocation.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                /* If nothing is there ...*/
+                if (dataSnapshot.getValue() == null) {
+                    HashMap<String, Object> userAndUidMapping = new HashMap<String, Object>();
+
+                    //HashMap<String, Object> timestampJoined = new HashMap<>();
+                    //timestampJoined.put(Constants.FIREBASE_PROPERTY_TIMESTAMP, ServerValue.TIMESTAMP);
+
+                              /* Create a HashMap version of the user to add */
+                    User newUser = new User(userName, mEncodedEmail);
+
+                    HashMap<String, Object> newUserMap = (HashMap<String, Object>)
+                            new ObjectMapper().convertValue(newUser, Map.class);
+
+                                 /* Add the user and UID to the update map */
+                    userAndUidMapping.put("/" + Constants.FIREBASE_LOCATION_USERS + "/" + mEncodedEmail,
+                            newUserMap);
+                    userAndUidMapping.put("/" + Constants.FIREBASE_LOCATION_UID_MAPPINGS + "/" + authData.getId(), mEncodedEmail);
+
+                                  /* Update the database */
+                    mFirebaseRef.updateChildren(userAndUidMapping);
+
+                }
+            }
+
+            @Override
+            public void onCancelled(FirebaseError firebaseError) {
+
+            }
+        });
+
 
     }
 
@@ -401,6 +467,7 @@ public class LoginActivity extends BaseActivity implements
                             finish();
                             encodeEmail=Utils.encodeEmail(acct.getEmail().toString());
                             mAuthProgressDialog.hide();
+                            //setAuthenticatedUserGoogle(acct);
                             Intent intent=new Intent(LoginActivity.this,MainActivity.class);
                             startActivity(intent);
                             finish();
@@ -410,7 +477,8 @@ public class LoginActivity extends BaseActivity implements
                             String s = acct.getEmail().toString();
                             mUserEmail = Utils.encodeEmail(s);
                             mUserName=acct.getGivenName().toString();
-                            createUserInFirebaseHelper(encodeEmail,mUserName,mUserEmail);
+                            uId = acct.getId().toString();
+                            createUserInFirebaseHelper(encodeEmail, mUserName, mUserEmail, uId);
                         }
                         // [START_EXCLUDE]
                         mAuthProgressDialog.hide();
@@ -420,9 +488,10 @@ public class LoginActivity extends BaseActivity implements
                 });
     }
 
-    private void createUserInFirebaseHelper(String encodeEmail, final String mUserName, final String mUserEmail) {
+    private void createUserInFirebaseHelper(String encodeEmail, final String mUserName, final String mUserEmail, String uId) {
 
         final Firebase userLocation = new Firebase(Constants.FIREBASE_URL_USERS).child(encodeEmail);
+        final Firebase uidMapping = new Firebase(Constants.FIREBASE_URL).child(Constants.FIREBASE_LOCATION_UID_MAPPINGS);
         /**
          +         * See if there is already a user (for example, if they already logged in with an associated
          +         * Google account.
@@ -438,6 +507,7 @@ public class LoginActivity extends BaseActivity implements
 
                     User newUser = new User(mUserName, mUserEmail);
                     userLocation.setValue(newUser);
+
                 }
             }
 

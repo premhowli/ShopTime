@@ -6,16 +6,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.firebase.client.ChildEventListener;
-import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.Query;
 import com.howlzzz.shoptime.R;
@@ -24,8 +20,6 @@ import com.howlzzz.shoptime.ui.activeListDetails.ActiveListDetailsActivity;
 import com.howlzzz.shoptime.utils.Constants;
 import com.howlzzz.shoptime.utils.Utils;
 
-import java.util.Date;
-
 
 /**
  * A simple {@link Fragment} subclass that shows a list of all shopping lists a user can see.
@@ -33,8 +27,8 @@ import java.util.Date;
  * create an instance of this fragment.
  */
 public class ShoppingListsFragment extends Fragment {
-    private ListView mListView;
     String mEncodedEmail;
+    private ListView mListView;
     /*private TextView mTextViewListName;
     private TextView mTextViewOwner;
     private TextView mTextViewTime;
@@ -139,6 +133,7 @@ public class ShoppingListsFragment extends Fragment {
             // and modify the Firebase query that is passed to the adapter accordingly.
                 Query orderedActiveUserListsRef;
         Firebase activeListsRef = new Firebase(Constants.FIREBASE_URL_USER_LISTS).child(mEncodedEmail);
+        activeListsRef.keepSynced(true);
                 /**
          +         * Sort active lists by "date created"
          +         * if it's been selected in the SettingsActivity
